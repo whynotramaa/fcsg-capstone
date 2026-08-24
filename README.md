@@ -28,7 +28,9 @@ is the size it should be, the model can memorise a single image, and a killed
 run resumes at the right step.
 
 1. Open `notebooks/checks.ipynb` on Kaggle.
-2. Add a public DIV2K dataset as an input, and turn on the GPU accelerator.
+2. Add a public DIV2K **dataset** as an input (Add Input > Datasets, not
+   Notebooks), and turn on the GPU accelerator. The dataset must contain both
+   splits, e.g. `DIV2K_train_HR` and `DIV2K_valid_HR`.
 3. Run every cell in order.
 
 If a cell fails, fix the code locally, push, then re-run from the clone cell. Do
