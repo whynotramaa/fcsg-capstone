@@ -60,9 +60,11 @@ python evaluation/eval.py --ckpt <ckpt.pt> --data /kaggle/input --out results
 python evaluation/plots.py --csv <ckpt dir>/train_log.csv --out results/figures
 ```
 
-`--data` accepts any directory above `DIV2K_train_HR` and `DIV2K_valid_HR`.
-`fcsg_net.utils.resolve_div2k` finds both, so no Kaggle dataset slug is written
-down anywhere.
+`--data` accepts any directory above the DIV2K images.
+`fcsg_net.utils.resolve_div2k` walks down from there and picks the training and
+validation directories by name, so no Kaggle dataset slug is written down
+anywhere. When it fails, it lists every directory that holds images. Pass
+`--train-dir` and `--val-dir` with two of those paths to skip the search.
 
 Two flags on `train.py` exist for the gate checks. `--steps N` caps the
 iteration count. `--overfit-one-image` trains on one fixed crop with one fixed

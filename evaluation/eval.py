@@ -66,7 +66,8 @@ def load_image(path, device, multiple=8):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", required=True)
-    ap.add_argument("--data", required=True, help="any ancestor of DIV2K_valid_HR")
+    ap.add_argument("--data", required=True, help="any ancestor of the DIV2K image directories")
+    ap.add_argument("--val-dir", help="skip the search and score this directory")
     ap.add_argument("--out", default="results", help="benchmark.csv and figures/ go here")
     ap.add_argument("--limit", type=int, default=20, help="validation images to score")
     ap.add_argument("--notes", default="", help="e.g. smoke, final")
@@ -85,7 +86,7 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
     print(f"{method} @ step {ck['step']}  params {n_params:,}  sigma {cfg['sigma']}  device {device}")
 
-    _, val_dir = resolve_div2k(args.data)
+    _, val_dir = resolve_div2k(args.data, args.val_dir, args.val_dir)
     files = find_images(val_dir)[: args.limit]
 
     ins, outs, samples = [], [], []

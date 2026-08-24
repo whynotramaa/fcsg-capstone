@@ -74,7 +74,9 @@ def validate(model, val_batch, sigma, device):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
-    ap.add_argument("--data", required=True, help="any ancestor of DIV2K_train_HR")
+    ap.add_argument("--data", required=True, help="any ancestor of the DIV2K image directories")
+    ap.add_argument("--train-dir", help="skip the search and use this directory for training")
+    ap.add_argument("--val-dir", help="skip the search and use this directory for validation")
     ap.add_argument("--out", required=True, help="checkpoints and log land here")
     ap.add_argument("--steps", type=int, help="override config, for smoke runs")
     ap.add_argument("--batch", type=int)
@@ -92,7 +94,7 @@ def main():
     if device == "cpu":
         print("WARNING: no GPU visible. Enable the accelerator before a real run.")
 
-    train_dir, val_dir = resolve_div2k(args.data)
+    train_dir, val_dir = resolve_div2k(args.data, args.train_dir, args.val_dir)
     print(f"train={train_dir}\nval={val_dir}")
 
     sigma = cfg["sigma"] / 255.0
