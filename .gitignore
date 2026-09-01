@@ -9,4 +9,4 @@ __pycache__/
 kaggle.json
 .kaggle/
 results/*.html
-results/*.pdf
+results/.pdf
