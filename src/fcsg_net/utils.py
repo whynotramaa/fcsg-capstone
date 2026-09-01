@@ -117,8 +117,6 @@ def resolve_div2k(root, train_dir=None, val_dir=None):
     if train is None and val is not None:
         train = _pick(dirs, ("hr", ""), taken={val})
     if train is not None and val is None and len(dirs) == 1:
-        # One directory, no split. Fine for a smoke run, wrong for a real one:
-        # validation crops are drawn from images the model trains on.
         val = train
         print(f"WARNING: only one image directory found ({train}). Validating on "
               f"training images. Attach a dataset with a validation split before "

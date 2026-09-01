@@ -105,7 +105,6 @@ def main():
             ax.axvspan(lo, hi, color="0.9", zorder=0)
         ax.plot(*xy(p_out), marker="o", ms=3, label="restored")
         if p_in:
-            # the do-nothing floor: without it, a PSNR number means nothing
             base = sum(v for _, v in p_in) / len(p_in)
             ax.axhline(base, ls="--", c="grey", label=f"noisy input ({base:.2f} dB)")
         ax.set_xlabel("step")

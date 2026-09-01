@@ -1,8 +1,4 @@
-"""DnCNN (Zhang et al., TIP 2017). Phase 1 smoke-test baseline.
-
-Predicts the noise and subtracts it, which is the paper's whole contribution and
-worth about 1 dB over predicting the clean image directly.
-"""
+"""DnCNN (Zhang et al., TIP 2017)."""
 
 import torch
 import torch.nn as nn

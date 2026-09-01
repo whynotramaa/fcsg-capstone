@@ -1,7 +1,6 @@
-# DnCNN baseline, Phase 1. Gaussian sigma=25 only; the composite archival
-# degradation arrives in Phase 2 and gets its own config.
+# DnCNN baseline
 model = "dncnn"
-sigma = 25          # in 0-255 units
+sigma = 25
 patch = 128
 batch = 16
 steps = 300000
@@ -14,6 +13,4 @@ log_every = 50
 val_every = 2000
 ckpt_every = 2000
 val_images = 16
-# Stop and save before Kaggle's 12h cap kills the session and takes
-# /kaggle/working with it. Leaves room for the eval and plot cells.
 max_hours = 11.0

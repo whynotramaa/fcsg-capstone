@@ -1,4 +1,4 @@
-"""Metrics. PSNR only until the Phase 3 benchmark table needs SSIM and LPIPS."""
+"""Metrics."""
 
 import torch
 
