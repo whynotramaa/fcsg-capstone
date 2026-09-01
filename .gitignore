@@ -6,3 +6,7 @@ __pycache__/
 *.py[cod]
 .venv/
 .ipynb_checkpoints/
+kaggle.json
+.kaggle/
+results/*.html
+results/*.pdf
