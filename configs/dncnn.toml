@@ -14,3 +14,6 @@ log_every = 50
 val_every = 2000
 ckpt_every = 2000
 val_images = 16
+# Stop and save before Kaggle's 12h cap kills the session and takes
+# /kaggle/working with it. Leaves room for the eval and plot cells.
+max_hours = 11.0

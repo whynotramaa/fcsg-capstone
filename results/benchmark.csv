@@ -1,0 +1,2 @@
+method,steps,sigma,psnr_in,psnr_out,gain,params,images,notes
+dncnn,286000,25,20.534,31.043,10.508,558403,68,phase1-cbsd68

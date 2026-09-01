@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 ROOT = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
-from fcsg_net.data import PatchDataset  # noqa: E402
+from fcsg_net.data import PatchDataset, TileDataset  # noqa: E402
 from fcsg_net.metrics import psnr  # noqa: E402
 from fcsg_net.utils import (  # noqa: E402
     CSVLog,
@@ -77,15 +77,17 @@ def main():
     ap.add_argument("--data", required=True, help="any ancestor of the DIV2K image directories")
     ap.add_argument("--train-dir", help="skip the search and use this directory for training")
     ap.add_argument("--val-dir", help="skip the search and use this directory for validation")
+    ap.add_argument("--tiles", help="a .npy tile cache from build_tiles.py; much faster than --data")
     ap.add_argument("--out", required=True, help="checkpoints and log land here")
     ap.add_argument("--steps", type=int, help="override config, for smoke runs")
     ap.add_argument("--batch", type=int)
     ap.add_argument("--overfit-one-image", action="store_true")
+    ap.add_argument("--max-hours", type=float, help="override config, stop and save before this")
     args = ap.parse_args()
 
     with open(args.config, "rb") as f:
         cfg = tomllib.load(f)
-    for k in ("steps", "batch"):
+    for k in ("steps", "batch", "max_hours"):
         if getattr(args, k) is not None:
             cfg[k] = getattr(args, k)
 
@@ -107,8 +109,11 @@ def main():
         loader = None
     else:
         workers = cfg.get("workers", 4)
+        tiles = args.tiles or cfg.get("tiles")
+        train_ds = TileDataset(tiles) if tiles else PatchDataset(train_dir, patch=cfg["patch"])
+        print(f"train samples={len(train_ds)} source={tiles or train_dir}")
         loader = DataLoader(
-            PatchDataset(train_dir, patch=cfg["patch"]),
+            train_ds,
             batch_size=cfg["batch"],
             shuffle=True,
             num_workers=workers,
@@ -141,6 +146,12 @@ def main():
 
     log = CSVLog(out_dir / "train_log.csv", ["step", "loss", "lr", "psnr_in", "psnr_out", "secs"])
     total = cfg["steps"]
+    # A Kaggle session killed at the 12h cap loses /kaggle/working entirely, so
+    # the run has to stop itself with time to spare and let the notebook finish.
+    budget = cfg.get("max_hours", 11.5) * 3600
+    if start >= total:
+        print(f"already at step {start}/{total}, nothing to do")
+        return
     data = infinite(loader) if loader is not None else None
     fixed_noisy = None
     t0 = time.time()
@@ -177,12 +188,20 @@ def main():
             print(f"  val psnr  in {p_in:.2f} dB  ->  out {p_out:.2f} dB")
             log.write(step=step, psnr_in=f"{p_in:.3f}", psnr_out=f"{p_out:.3f}", secs=f"{time.time() - t0:.0f}")
 
-        if step % cfg.get("ckpt_every", 2000) == 0 or step == total:
+        out_of_time = time.time() - t0 > budget
+        if step % cfg.get("ckpt_every", 2000) == 0 or step == total or out_of_time:
             save_checkpoint(out_dir / f"ckpt_{step:07d}.pt", step, model, opt, scaler,
                             extra={"config": cfg, "params": n_params})
             print(f"  saved ckpt_{step:07d}.pt")
 
-    print(f"done at step {total} in {time.time() - t0:.0f}s")
+        if out_of_time:
+            rate = (step - start) / max(time.time() - t0, 1)
+            print(f"stopping at step {step}/{total}: {budget / 3600:.1f}h budget reached. "
+                  f"Re-run the notebook with this output attached to resume. "
+                  f"~{(total - step) / max(rate, 1e-9) / 3600:.1f}h of GPU left at this rate.")
+            break
+
+    print(f"stopped at step {step}/{total} in {time.time() - t0:.0f}s")
 
 
 if __name__ == "__main__":
