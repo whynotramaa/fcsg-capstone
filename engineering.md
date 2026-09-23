@@ -39,8 +39,9 @@ with interpretable gates under 5M parameters, and the routing maps are the
 result, not a side effect. `plan.md` section 0.1 explains why the claim had to
 be narrowed and which papers force the narrowing.
 
-None of that model exists yet. What exists is the machinery around it, built
-against DnCNN first on purpose. DnCNN has a published number, so if the training
+The model and composite pipeline are now implemented. Their runtime gates are
+pending the user-run milestone notebook; see `results/milestone_status.md`.
+The original machinery was built against DnCNN first on purpose. DnCNN has a published number, so if the training
 loop, the degradation, the metric, or the evaluation has a bug, DnCNN misses its
 number and you know the bug is in the training and evaluation code rather than
 in the model. Build the same machinery against a novel architecture instead, and
@@ -60,11 +61,11 @@ supply of patches is not.
 
 Two design decisions in that file are worth knowing.
 
-**Degradation is not applied in the dataset.** The dataset yields clean crops
-under the key `hr`, and the training loop adds noise. Phase 2 replaces
-`add_noise` with the composite archival pipeline (blur, resample, noise, JPEG)
-without touching the dataset at all. It also means validation can use a fixed
-noise seed against the same crops, which the dataset could not do on its own.
+**Gaussian noise is applied on the GPU.** The clean dataset returns `hr`.
+For composite degradation, `DegradedDataset` wraps the clean dataset and adds
+`lr`, blur sigma, resampling scale, noise sigma, and JPEG quality inside each
+DataLoader worker. Validation fixes both crop and degradation seeds. FFDNet
+receives the recorded noise sigma through the shared `predict` function.
 
 **The seed argument controls reproducibility, not shuffling.** With `seed=None`
 the crop for a given index is fresh on every access, which is what training
@@ -169,13 +170,13 @@ patches. Training on 128x128 crops and reporting on 128x128 crops would flatter
 the model, and the published DnCNN numbers everyone compares against are
 full-image numbers.
 
-A 2K image will not fit in 4 GB of VRAM, so `tiled_forward` runs the model over
-256x256 tiles with 32 pixels of overlap and averages where they overlap. For
-DnCNN, which is fully convolutional and translation invariant, tiling is
-exactly equivalent to a whole-image pass. For FCSG-Net it will not be, unless
-the band radii are normalised to a fraction of Nyquist rather than fixed in bin
-counts. `plan.md` section 0.3 covers that, and it is the reason the tiling code
-exists now rather than later.
+To limit activation memory, `tiled_forward` uses 256x256 tiles with 32 pixels
+of overlap and averages where they overlap. This is an approximation even for
+DnCNN because tile-edge padding changes its context. FCSG-Net also changes
+FFT boundaries, routing windows, and SE pooling context. Cutoffs in cycles per
+pixel preserve physical frequency but do not make tiled and whole-image
+inference identical. The FFDNet reproduction uses whole CBSD68 images and
+keeps every pixel, including odd dimensions.
 
 `eval.py` appends one row to `results/benchmark.csv` with the method, step
 count, sigma, input and output PSNR, gain, parameters, and a free-text note.
@@ -241,23 +242,28 @@ later.
 Do not continue past a failing cell. Fix it locally, push, re-run from the clone
 cell.
 
-## What is not built yet
+## Phase 1 and Phase 2 implementation
 
-Phase 1 machinery is complete. The research contribution has none of its pieces
-yet.
+`models/ffdnet.py` implements the colour baseline with noise-map conditioning
+and the author's inference-weight layout. `models/blocks.py` and `models/fcsg.py`
+implement soft Fourier bands, shared separable experts, spatial top-2 mixing,
+SE fusion, and residual refinement. `src/fcsg_net/degrade.py` provides composite
+samples and a reproducible 5,000-pair export.
 
-- `src/fcsg_net/degrade.py`, the composite archival pipeline. Phase 2.
-- `models/fcsg.py`, the model itself, plus `blocks.py`. Phase 2.
-- `models/ffdnet.py`, the second baseline, which Phase 1's exit test names. Only
-  DnCNN exists.
-- The frequency and entropy loss terms. `train.py` computes Charbonnier alone.
-- SSIM and LPIPS. `metrics.py` has PSNR only, and the Phase 3 exit test requires
-  all three.
-- `evaluation/ablate.py` and `evaluation/visualize_routing.py`. Phase 4.
-- `notes/related.md` has its four section headings and no paragraphs under them.
+The trained DnCNN remains the only measured result in this checkout. Run
+`notebooks/phase1_phase2.ipynb` to produce FFDNet and Phase 2 evidence. The
+notebook uses pretrained FFDNet weights for inference reproduction, records
+actual GPU memory and compute, and stops on failed checks. A T4 result is not
+an RTX 3050 measurement. `results/milestone_status.md` records these limits.
 
-The reading is the part of Phase 1 that has not moved, and it is the part with
-the closest deadline.
+The experts operate after a lossless 2x pixel rearrangement and use depthwise
+separable convolutions to meet the compute budget. Every expert executes;
+top-2 mixing alone does not reduce computation. FFT cutoffs use cycles per
+pixel, but inference tiles still change boundaries and context.
+
+Phase 3 still needs frequency and entropy loss terms, matched training of all
+three models, SSIM, and LPIPS. Phase 4 still needs ablations and routing figures.
+The literature review is now in `notes/related.md`.
 
 ## Rough edges
 

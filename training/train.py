@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from fcsg_net.data import PatchDataset, TileDataset  # noqa: E402
+from fcsg_net.degrade import DegradedDataset  # noqa: E402
 from fcsg_net.metrics import psnr  # noqa: E402
 from fcsg_net.utils import (  # noqa: E402
     CSVLog,
@@ -39,7 +40,21 @@ def build_model(name, **kwargs):
         from models.dncnn import DnCNN
 
         return DnCNN(**kwargs)
+    if name == "ffdnet":
+        from models.ffdnet import FFDNet
+
+        return FFDNet(**kwargs)
+    if name == "fcsg":
+        from models.fcsg import FCSGNet
+
+        return FCSGNet(**kwargs)
     raise ValueError(f"unknown model {name!r}")
+
+
+def predict(model, noisy, sigma):
+    from models.ffdnet import FFDNet
+
+    return model(noisy, sigma) if isinstance(model, FFDNet) else model(noisy)
 
 
 def charbonnier(pred, target, eps=1e-3):
@@ -60,15 +75,16 @@ def infinite(loader):
 
 
 @torch.no_grad()
-def validate(model, val_batch, sigma, device):
+def validate(model, val_batch, sigma, device, clip=True):
     """Fixed crops, fixed noise, so numbers are comparable across sessions."""
     model.eval()
-    hr = val_batch.to(device)
+    hr = val_batch["hr"].to(device)
     g = torch.Generator(device=device).manual_seed(VAL_SEED)
-    noisy = add_noise(hr, sigma, generator=g)
-    out = model(noisy)
+    noisy = val_batch["lr"].to(device) if "lr" in val_batch else add_noise(hr, sigma, generator=g, clip=clip)
+    levels = val_batch["noise_sigma"].to(device) / 255 if "lr" in val_batch else sigma
+    out = predict(model, noisy, levels)
     model.train()
-    return psnr(noisy, hr), psnr(out, hr)
+    return psnr(noisy, hr, clip=False), psnr(out, hr)
 
 
 def main():
@@ -100,17 +116,26 @@ def main():
     print(f"train={train_dir}\nval={val_dir}")
 
     sigma = cfg["sigma"] / 255.0
+    if cfg.get("degradation", "gaussian") not in ("gaussian", "composite"):
+        raise ValueError("degradation must be 'gaussian' or 'composite'")
+    composite = cfg.get("degradation", "gaussian") == "composite"
+    clip = cfg.get("clip_noise", True)
     if args.overfit_one_image:
         # One fixed crop with one fixed noise realisation, repeated forever. A
         # model that cannot memorise this has a bug, and finding out costs two
         # minutes here instead of ten hours on a real run.
-        one = PatchDataset(train_dir, patch=cfg["patch"], seed=0, limit=1)[0]["hr"]
-        train_batch = one.unsqueeze(0).repeat(cfg["batch"], 1, 1, 1)
+        one = PatchDataset(train_dir, patch=cfg["patch"], seed=0, limit=1)
+        one = DegradedDataset(one, seed=0) if composite else one
+        train_batch = next(iter(DataLoader(one, batch_size=1)))
         loader = None
     else:
         workers = cfg.get("workers", 4)
         tiles = args.tiles or cfg.get("tiles")
         train_ds = TileDataset(tiles) if tiles else PatchDataset(train_dir, patch=cfg["patch"])
+        if composite:
+            train_ds = DegradedDataset(train_ds)
+        if len(train_ds) < cfg["batch"]:
+            raise ValueError("training dataset is smaller than the batch size")
         print(f"train samples={len(train_ds)} source={tiles or train_dir}")
         loader = DataLoader(
             train_ds,
@@ -123,7 +148,9 @@ def main():
         )
 
     val_ds = PatchDataset(val_dir, patch=cfg["patch"], seed=VAL_SEED, limit=cfg.get("val_images", 16))
-    val_batch = torch.stack([val_ds[i]["hr"] for i in range(len(val_ds))])
+    if composite:
+        val_ds = DegradedDataset(val_ds, seed=VAL_SEED)
+    val_batch = next(iter(DataLoader(val_ds, batch_size=len(val_ds))))
 
     model = build_model(cfg["model"], **cfg.get("model_args", {})).to(device)
     n_params = sum(p.numel() for p in model.parameters())
@@ -162,17 +189,20 @@ def main():
             g["lr"] = lr
 
         if loader is None:
-            hr = train_batch.to(device)
+            hr = train_batch["hr"].to(device)
             if fixed_noisy is None:
                 g = torch.Generator(device=device).manual_seed(0)
-                fixed_noisy = add_noise(hr, sigma, generator=g)
+                fixed_noisy = train_batch["lr"].to(device) if composite else add_noise(hr, sigma, generator=g, clip=clip)
             noisy = fixed_noisy
+            levels = train_batch["noise_sigma"].to(device) / 255 if composite else sigma
         else:
-            hr = next(data)["hr"].to(device, non_blocking=True)
-            noisy = add_noise(hr, sigma)
+            sample = next(data)
+            hr = sample["hr"].to(device, non_blocking=True)
+            noisy = sample["lr"].to(device, non_blocking=True) if composite else add_noise(hr, sigma, clip=clip)
+            levels = sample["noise_sigma"].to(device) / 255 if composite else sigma
 
         with torch.amp.autocast("cuda", dtype=torch.float16, enabled=use_amp):
-            loss = charbonnier(model(noisy), hr)
+            loss = charbonnier(predict(model, noisy, levels), hr)
 
         opt.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
@@ -184,7 +214,7 @@ def main():
             log.write(step=step, loss=f"{loss.item():.6f}", lr=f"{lr:.3e}", secs=f"{time.time() - t0:.0f}")
 
         if step % cfg.get("val_every", 2000) == 0 or step == total:
-            p_in, p_out = validate(model, val_batch, sigma, device)
+            p_in, p_out = validate(model, val_batch, sigma, device, clip=clip)
             print(f"  val psnr  in {p_in:.2f} dB  ->  out {p_out:.2f} dB")
             log.write(step=step, psnr_in=f"{p_in:.3f}", psnr_out=f"{p_out:.3f}", secs=f"{time.time() - t0:.0f}")
 

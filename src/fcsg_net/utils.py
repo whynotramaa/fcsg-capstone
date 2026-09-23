@@ -8,10 +8,11 @@ from pathlib import Path
 import torch
 
 
-def add_noise(x, sigma, generator=None):
+def add_noise(x, sigma, generator=None, clip=True):
     """Additive white Gaussian noise. sigma is in [0, 1] units, i.e. 25/255."""
     noise = torch.randn(x.shape, device=x.device, dtype=x.dtype, generator=generator)
-    return (x + noise * sigma).clamp(0, 1)
+    noisy = x + noise * sigma
+    return noisy.clamp(0, 1) if clip else noisy
 
 
 def save_checkpoint(path, step, model, optimizer=None, scaler=None, extra=None):

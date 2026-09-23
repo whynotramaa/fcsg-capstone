@@ -4,8 +4,8 @@ PatchDataset crops straight from PNGs. TileDataset reads a pre-extracted uint8
 memmap built by training/build_tiles.py, which is what real runs should use:
 decoding a 2K PNG per sample caps the loader at roughly 1.8 steps/s.
 
-Degradation is applied in the training loop, not here, so the Phase 2 pipeline
-slots in unchanged.
+These datasets return clean crops. DegradedDataset wraps either dataset for
+composite degradation in DataLoader workers; Gaussian noise stays on the GPU.
 """
 
 import argparse

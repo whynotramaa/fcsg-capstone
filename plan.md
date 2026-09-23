@@ -3,9 +3,9 @@
 Working plan for the B.Tech research project (CP-I), Autumn 2026-27. Written
 2026-08-24, with M1 due late August and the final report due mid-November.
 
-Compute available: one RTX 3050 (local), Kaggle (30 GPU-hours/week, P100 or
-2x T4, 12-hour session cap), Colab (T4, unreliable session length). Every
-decision below is shaped by that budget.
+Execution uses Kaggle or Colab. The local NVIDIA driver is unavailable.
+See `results/milestone_status.md` for implemented work and pending measurements.
+The self-contained `notebooks/phase1_phase2.ipynb` runs the remaining M1/M2 gates.
 
 ## 0. Read this before you write code
 
@@ -18,20 +18,19 @@ The gap table lists UNet, DnCNN, Restormer, SwinIR, FFDNet, FFC, NAFNet. It
 omits the papers that are actually closest, and a panel member who knows the
 field will ask about them:
 
-- **MWCNN** (Liu et al., 2018) already splits the image into wavelet subbands
-  and processes each with its own branch.
+- **MWCNN** (Liu et al., 2018) already uses wavelet subbands and processes
+  them jointly inside a modified U-Net.
 - **SFNet / FSNet** (Cui et al., ICLR 2023 and TPAMI 2024) do *frequency
   selection* for image restoration, with learned band-wise modulation. This
   is the nearest neighbour to FCSG-Net.
 - **FFTformer** (Kong et al., CVPR 2023) does restoration with frequency-domain
   attention.
 
-None of them use a **sparse learned router over structurally distinct experts**
-with an explicit entropy objective, and none report the routing weights as an
-interpretability artefact. That is the defensible claim. Rewrite the gap
-paragraph as: *band-adaptive sparse expert routing with interpretable gates at
-under 5M parameters*, not *nobody has done frequency decomposition*. Do this
-during M1 while reading, not later.
+The project tests spatial top-k routing over distinct shared experts after
+frequency decomposition, with routing compared against recorded degradation
+parameters. This is a research hypothesis, not an exhaustive novelty claim.
+The literature review is in `notes/related.md`. The current implementation has
+sparse mixing weights but evaluates every expert; it claims no dispatch speedup.
 
 ### 0.2 Do not feed raw complex spectra to the CNN experts
 
@@ -61,13 +60,14 @@ report: *frequency-domain band selection, spatial-domain expert processing*.
 
 ### 0.3 Global FFT breaks patch training
 
-You will train on 128x128 patches and evaluate on full images. A global FFT
-makes the band cutoffs $r_1, r_2$ depend on image size, so a model trained on
-patches sees different physical frequencies at test time.
+You will train on 128x128 patches and evaluate on larger images. Cutoffs
+specified as FFT bin indices change their physical frequency with image size.
 
 Fix: define $r_1, r_2$ as **normalised** radii in $[0, 0.5]$ cycles/pixel
-(fraction of Nyquist), never in absolute bin counts. Then patch and full-image
-inference see the same bands. Verify with an explicit test (Phase 2).
+(0.5 is the axis Nyquist frequency), never in absolute bin counts. This keeps
+physical cutoffs consistent. It does not make tiled inference equal to a
+full-image FFT: boundary conditions, spatial context, and global SE pooling
+still differ. Phase 2 tests the same sinusoidal frequencies at two resolutions.
 
 Also make the masks **soft** (a raised-cosine transition band about 0.05 wide
 rather than a hard `1[rho < r1]`). Hard masks produce ringing artefacts, which
@@ -110,10 +110,13 @@ Goal: reproduce FFDNet within 0.5 dB so you have a trustworthy yardstick.
    baseline. It is 40 lines. Train on Gaussian sigma=25 additive noise.
 4. Implement FFDNet with the noise-level map input.
 
-Exit test: DnCNN reaches roughly 29 dB PSNR on the DIV2K validation set at
-sigma=25, and FFDNet is within 0.5 dB of its published CBSD68 number when
-evaluated on CBSD68. If your baseline is wrong, every comparison afterwards is
-worthless, so do not skip this.
+Exit test: record DnCNN's RGB DIV2K validation result at sigma 25. The existing
+clipped-noise run reached 32.646 dB; the old 29 dB target confused this setting
+with grayscale BSD68. FFDNet must be within 0.5 dB of 31.21 dB on all 68 clean
+CBSD68 images using the author's unclipped-noise protocol. The milestone notebook
+tests the author's pretrained weights and records their SHA-256. This verifies
+implementation and inference, not training from scratch. Phase 3 still requires
+training every comparison method on the same composite degradation.
 
 Why baselines first: it forces the whole training and evaluation loop into
 existence against a model whose expected numbers you already know. Any bug
@@ -151,25 +154,34 @@ the GPU, use `num_workers=4` and pre-decode the HR images to a `.npy` memmap.
 1. `FrequencyDecompose`: soft radial masks, normalised radii, returns three real
    images. **Test: `assert torch.allclose(x_L + x_M + x_H, x, atol=1e-5)`.**
    This single assert catches most FFT sign, shift, and normalisation bugs.
-   Use `torch.fft.rfft2` with `norm="ortho"` and remember `fftshift` when
-   building masks but not when applying `irfft2`.
+   Use `torch.fft.rfft2` with `norm="ortho"`. Build masks directly from
+   `fftfreq` and `rfftfreq`, without `fftshift`, so their bins already match.
 2. `Expert`: shared class, kernel size as an argument. 4 residual blocks,
-   48 channels. Three instances at 7x7, 5x5, 3x3.
-3. `Gate`: pooled band statistics to routing maps, per section 0.4. Softmax over
-   the expert axis with temperature `tau`.
+   48 channels. Three shared instances at 7x7, 5x5, 3x3 process all three bands.
+   Each expert uses a lossless 2x pixel rearrangement and depthwise separable
+   convolutions. Dense full-resolution convolutions exceed the 10 GFLOP budget.
+3. `Gate`: local mean and energy to routing logits, per section 0.4. Upsample
+   the logits, select the top two experts, and softmax those logits with
+   temperature `tau`. Keep dense probabilities available for Phase 3 entropy.
 4. `SEFusion`: concat three band outputs, squeeze-excite, 1x1 conv to 3 channels.
 5. `Refine`: 3 spatial conv layers. Predict the **residual**, output
    `x_input + refined`. Residual prediction is worth roughly 1 dB for free and
    is what DnCNN's whole contribution was.
 
-Parameter budget: three experts at 48 channels and 4 blocks land near 1.2M
-each, so about 3.6M total, plus fusion and refinement. That fits under 5M. If
-you overshoot, cut expert channel width before cutting depth.
+The implemented separable experts retain 48 channels and four residual blocks.
+Their parameter count and all nine band/expert computations are checked in
+`evaluation/checks.py`. The old 3.6M estimate omitted the compute cost of
+applying every expert to every band. The notebook records thop MACs, counts
+two FLOPs per MAC, and adds a conservative FFT estimate. Small elementwise
+operations are excluded from that reported convention.
 
-Exit test: forward and backward pass on a 1x3x256x256 tensor on the RTX 3050
+Exit test: forward and backward pass on a 1x3x256x256 tensor
 under 4 GB VRAM, parameter count printed and under 5M, FLOPs measured with
 `fvcore` or `thop` and under 10 GFLOPs, perfect-reconstruction assert passing,
 and 200 steps of overfitting on a **single image** driving loss towards zero.
+The recorded overfit gate requires final MSE below 0.01 and below one quarter
+of initial MSE. The notebook records its actual GPU and enforces a 4 GB PyTorch
+allocation budget; a T4 measurement does not establish RTX 3050 compatibility.
 The overfit test is non-negotiable: a model that cannot memorise one image has
 a bug, and you will find it in minutes instead of after a 10-hour Kaggle run.
 
@@ -186,7 +198,7 @@ L = L_char + 0.05 * L_freq + lambda_ent * L_ent
   the literature.
 - `L_freq`: L1 on the magnitude of the FFT of the residual. Cheap, and it is
   thematically right for a frequency-domain paper.
-- `L_ent = -lambda * sum_b H(w_b)`, exactly as the proposal writes it.
+- `L_ent = -sum_b H(w_b)`, with `lambda_ent` applied once in the total loss.
   Minimising a negative entropy term maximises entropy, which keeps the router
   spread out and the experts alive. The sign is right, but it is easy to flip
   by accident when you write it in code, so assert that the entropy term *falls*
@@ -286,7 +298,7 @@ Add `data/`, `checkpoints/`, and `*.zip` to `.gitignore` now. The DIV2K zips are
 | FCSG-Net loses to FFDNet on PSNR | Compete on the parameter/FLOP tradeoff instead, which is the actual research question in the proposal. Plot PSNR against parameters, not PSNR alone. |
 | Kaggle quota runs out mid-October | Reduce to 200k iterations, and run the ablations on Colab. Decide by 10 Oct, not later. |
 | DIV2K's 800 images overfit | On-the-fly degradation gives effectively unlimited pairs. Add Flickr2K only if validation PSNR plateaus while training PSNR climbs. |
-| Full-image inference exceeds 4 GB VRAM | Evaluate on the 3050 with tiled inference, 256x256 tiles with 32-pixel overlap. Normalised radii (0.3) make this valid. |
+| Full-image inference exceeds 4 GB VRAM | Use 256x256 tiles with 32-pixel overlap. Report this approximation and compare boundary errors against full-image inference. |
 
 ## 4. Reading list
 
@@ -343,9 +355,8 @@ Read the starred ones properly. Skim the rest for the related-work section.
 
 ## 5. What to do next
 
-1. `.gitignore` for `data/`, `checkpoints/`, `*.zip`, then commit the scaffold.
-2. Unzip DIV2K, write `data.py`, verify a batch of crops renders correctly.
-3. Write `dncnn.py` and `train.py`, get one baseline training locally.
-4. In parallel, start the reading list and `notes/related.md`.
-
-Nothing in Phase 2 should start before the DnCNN baseline trains end to end.
+1. Import `notebooks/phase1_phase2.ipynb` into Kaggle.
+2. Enable a GPU and Internet, then attach `joe1995/div2k-dataset`.
+3. Run all cells. Fix any failed assertion before continuing.
+4. Download the result archive and D2 snapshot. Record the measured gates in
+   `results/milestone_status.md` before starting Phase 3 training.
