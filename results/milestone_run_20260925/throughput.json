@@ -1,0 +1,20 @@
+{
+  "steps_measured": 1000,
+  "warmup_steps": 200,
+  "budget_hours": 30,
+  "note": "tile cache, composite degradation, batch 16; validation and checkpoint time excluded",
+  "models": {
+    "dncnn_composite": {
+      "steps_per_second": 9.411764705882353,
+      "steps_in_budget": 1016470
+    },
+    "ffdnet_composite": {
+      "steps_per_second": 26.666666666666668,
+      "steps_in_budget": 2880000
+    },
+    "fcsg": {
+      "steps_per_second": 5.839416058394161,
+      "steps_in_budget": 630656
+    }
+  }
+}

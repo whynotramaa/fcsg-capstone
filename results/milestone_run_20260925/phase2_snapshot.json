@@ -1,0 +1,10 @@
+{
+  "pairs": 5000,
+  "seed": 1234,
+  "patch": 128,
+  "seconds": 545.0463207140001,
+  "path": "/kaggle/working/fcsg-milestones-20260925-195516/d2",
+  "archive": "d2_snapshot.zip",
+  "archive_sha256": "394c4410ab6b125563353897d7221d9ffd9ef15f810aaec1cc300c8499147f5f",
+  "manifest_sha256": "7ce7f310bdb4d2d5877f92cabec4551c0ebd025931383901468380a070894514"
+}

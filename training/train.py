@@ -9,6 +9,7 @@ how you keep them honest.
 
 import argparse
 import math
+import random
 import sys
 import time
 import tomllib
@@ -57,10 +58,24 @@ def predict(model, noisy, sigma):
     return model(noisy, sigma) if isinstance(model, FFDNet) else model(noisy)
 
 
+def fixed_sigma(cfg):
+    value = cfg.get("ffdnet_sigma", "oracle")
+    return None if value == "oracle" else value / 255
+
+
 def charbonnier(pred, target, eps=1e-3):
     """Standard restoration loss. Used for the baselines too, so the Phase 3
     comparison against FCSG-Net is like for like."""
     return torch.sqrt((pred - target) ** 2 + eps**2).mean()
+
+
+def freq_loss(pred, target):
+    return torch.fft.rfft2((pred - target).float(), norm="ortho").abs().mean()
+
+
+def routing_entropy_loss(dense):
+    p = dense.float().clamp_min(1e-8)
+    return (p * p.log()).sum(2).mean((0, 2, 3)).sum()
 
 
 def cosine_lr(step, total, lr, lr_min):
@@ -75,13 +90,14 @@ def infinite(loader):
 
 
 @torch.no_grad()
-def validate(model, val_batch, sigma, device, clip=True):
+def validate(model, val_batch, sigma, device, clip=True, blind=None):
     """Fixed crops, fixed noise, so numbers are comparable across sessions."""
     model.eval()
     hr = val_batch["hr"].to(device)
     g = torch.Generator(device=device).manual_seed(VAL_SEED)
     noisy = val_batch["lr"].to(device) if "lr" in val_batch else add_noise(hr, sigma, generator=g, clip=clip)
     levels = val_batch["noise_sigma"].to(device) / 255 if "lr" in val_batch else sigma
+    levels = levels if blind is None else blind
     out = predict(model, noisy, levels)
     model.train()
     return psnr(noisy, hr, clip=False), psnr(out, hr)
@@ -106,6 +122,10 @@ def main():
     for k in ("steps", "batch", "max_hours"):
         if getattr(args, k) is not None:
             cfg[k] = getattr(args, k)
+    if "seed" in cfg:
+        random.seed(cfg["seed"])
+        torch.manual_seed(cfg["seed"])
+        print(f"training seed={cfg['seed']}")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"device={device} config={args.config} steps={cfg['steps']} batch={cfg['batch']}")
@@ -120,6 +140,7 @@ def main():
         raise ValueError("degradation must be 'gaussian' or 'composite'")
     composite = cfg.get("degradation", "gaussian") == "composite"
     clip = cfg.get("clip_noise", True)
+    blind = fixed_sigma(cfg)
     if args.overfit_one_image:
         # One fixed crop with one fixed noise realisation, repeated forever. A
         # model that cannot memorise this has a bug, and finding out costs two
@@ -171,7 +192,12 @@ def main():
     else:
         print("no checkpoint found, starting from step 0")
 
-    log = CSVLog(out_dir / "train_log.csv", ["step", "loss", "lr", "psnr_in", "psnr_out", "secs"])
+    log = CSVLog(out_dir / "train_log.csv", ["step", "loss", "lr", "psnr_in", "psnr_out", "secs", "entropy"])
+    freq_weight, ent_weight = cfg.get("freq_weight", 0.0), cfg.get("ent_weight", 0.0)
+    if ent_weight:
+        uniform = torch.full((1, 3, 3, 1, 1), 1 / 3)
+        peaked = torch.tensor([0.98, 0.01, 0.01]).reshape(1, 1, 3, 1, 1).expand(1, 3, 3, 1, 1)
+        assert routing_entropy_loss(uniform) < routing_entropy_loss(peaked), "entropy term has the wrong sign"
     total = cfg["steps"]
     # A Kaggle session killed at the 12h cap loses /kaggle/working entirely, so
     # the run has to stop itself with time to spare and let the notebook finish.
@@ -195,14 +221,26 @@ def main():
                 fixed_noisy = train_batch["lr"].to(device) if composite else add_noise(hr, sigma, generator=g, clip=clip)
             noisy = fixed_noisy
             levels = train_batch["noise_sigma"].to(device) / 255 if composite else sigma
+            levels = levels if blind is None else blind
         else:
             sample = next(data)
             hr = sample["hr"].to(device, non_blocking=True)
             noisy = sample["lr"].to(device, non_blocking=True) if composite else add_noise(hr, sigma, clip=clip)
             levels = sample["noise_sigma"].to(device) / 255 if composite else sigma
+            levels = levels if blind is None else blind
 
         with torch.amp.autocast("cuda", dtype=torch.float16, enabled=use_amp):
-            loss = charbonnier(predict(model, noisy, levels), hr)
+            entropy = None
+            if ent_weight:
+                pred, aux = model(noisy, return_aux=True)
+                entropy = routing_entropy_loss(aux["dense_routing"])
+            else:
+                pred = predict(model, noisy, levels)
+            loss = charbonnier(pred, hr)
+            if freq_weight:
+                loss = loss + freq_weight * freq_loss(pred, hr)
+            if entropy is not None:
+                loss = loss + ent_weight * max(0.0, 1 - step / total) * entropy
 
         opt.zero_grad(set_to_none=True)
         scaler.scale(loss).backward()
@@ -211,10 +249,11 @@ def main():
 
         if step % cfg.get("log_every", 50) == 0 or step == total:
             print(f"step {step}/{total}  loss {loss.item():.5f}  lr {lr:.2e}  {time.time() - t0:.0f}s")
-            log.write(step=step, loss=f"{loss.item():.6f}", lr=f"{lr:.3e}", secs=f"{time.time() - t0:.0f}")
+            log.write(step=step, loss=f"{loss.item():.6f}", lr=f"{lr:.3e}", secs=f"{time.time() - t0:.0f}",
+                      entropy="" if entropy is None else f"{-entropy.item():.4f}")
 
         if step % cfg.get("val_every", 2000) == 0 or step == total:
-            p_in, p_out = validate(model, val_batch, sigma, device, clip=clip)
+            p_in, p_out = validate(model, val_batch, sigma, device, clip=clip, blind=blind)
             print(f"  val psnr  in {p_in:.2f} dB  ->  out {p_out:.2f} dB")
             log.write(step=step, psnr_in=f"{p_in:.3f}", psnr_out=f"{p_out:.3f}", secs=f"{time.time() - t0:.0f}")
 

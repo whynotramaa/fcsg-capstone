@@ -1,20 +1,19 @@
 [project]
 name = "fcsg-net"
 version = "0.1.0"
-description = "Add your description here"
+description = "Band-adaptive sparse expert routing for image restoration"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "matplotlib>=3.11.1",
-    "numpy>=2.5.2",
-    "pillow>=12.3.0",
-    "torch>=2.13.0",
-    "torchvision>=0.28.0",
-    "tqdm>=4.70.0",
+    "lpips>=0.1.4",
+    "matplotlib>=3.8",
+    "numpy>=1.26",
+    "pillow>=10.0",
+    "thop>=0.1.1.post2209072238",
+    "torch>=2.4",
+    "torchvision>=0.19",
+    "tqdm>=4.66",
 ]
-
-[project.scripts]
-fcsg-net = "fcsg_net:main"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

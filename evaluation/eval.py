@@ -19,11 +19,15 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from fcsg_net.data import find_images  # noqa: E402
-from fcsg_net.metrics import psnr  # noqa: E402
+from fcsg_net.metrics import gflops, psnr, ssim  # noqa: E402
 from fcsg_net.utils import CSVLog, add_noise, resolve_div2k  # noqa: E402
 
 sys.path.append(str(ROOT / "training"))
-from train import build_model, predict  # noqa: E402
+from train import build_model, fixed_sigma, predict  # noqa: E402
+
+
+BENCHMARK_FIELDS = ["method", "steps", "degradation", "sigma", "psnr_in", "psnr_out", "gain",
+                    "ssim", "lpips", "gflops", "params", "images", "notes"]
 
 
 @torch.no_grad()
@@ -107,7 +111,10 @@ def main():
     if not files:
         raise ValueError("no evaluation images selected")
 
-    ins, outs, samples = [], [], []
+    import lpips
+
+    perceptual = lpips.LPIPS(net="alex", verbose=False).to(device).eval()
+    ins, outs, ssims, lpipss, samples = [], [], [], [], []
     for i, f in enumerate(files):
         hr = load_image(f, device)
         g = torch.Generator(device=device).manual_seed(i)
@@ -124,33 +131,43 @@ def main():
 
             lr, params = degrade(hr[0].cpu(), np.random.default_rng(i))
             noisy = lr.unsqueeze(0).to(device)
-            pred = tiled_forward(model, noisy, sigma=params["noise_sigma"] / 255).clamp(0, 1)
+            blind = fixed_sigma(cfg)
+            level = params["noise_sigma"] / 255 if blind is None else blind
+            pred = tiled_forward(model, noisy, sigma=level).clamp(0, 1)
         else:
             noisy = add_noise(hr, sigma, generator=g, clip=cfg.get("clip_noise", True))
             pred = tiled_forward(model, noisy, sigma=sigma).clamp(0, 1)
         p_in, p_out = psnr(noisy, hr, clip=False), psnr(pred, hr)
         ins.append(p_in)
         outs.append(p_out)
-        print(f"  {f.name}: {p_in:.2f} -> {p_out:.2f} dB")
+        ssims.append(ssim(pred, hr))
+        with torch.no_grad():
+            lpipss.append(perceptual(pred * 2 - 1, hr * 2 - 1).item())
+        print(f"  {f.name}: {p_in:.2f} -> {p_out:.2f} dB  ssim {ssims[-1]:.4f}  lpips {lpipss[-1]:.4f}")
         if len(samples) < 2:
             samples.append((noisy, pred, hr, p_in, p_out))
 
     psnr_in, psnr_out = sum(ins) / len(ins), sum(outs) / len(outs)
+    mean_ssim, mean_lpips = sum(ssims) / len(ssims), sum(lpipss) / len(lpipss)
+    cost = gflops(model, cfg["model"])
     print(f"\nmean over {len(files)} images: {psnr_in:.2f} dB in -> {psnr_out:.2f} dB out "
-          f"(+{psnr_out - psnr_in:.2f})")
+          f"(+{psnr_out - psnr_in:.2f})  ssim {mean_ssim:.4f}  lpips {mean_lpips:.4f}  {cost:.2f} GFLOPs")
 
     out_dir = Path(args.out)
-    log = CSVLog(out_dir / "benchmark.csv",
-                 ["method", "steps", "sigma", "psnr_in", "psnr_out", "gain", "params", "images", "notes"])
-    log.write(method=method, steps=ck["step"], sigma=cfg["sigma"],
+    degradation = cfg.get("degradation", "gaussian")
+    log = CSVLog(out_dir / "benchmark.csv", BENCHMARK_FIELDS)
+    log.write(method=method, steps=ck["step"], degradation=degradation,
+              sigma="" if degradation == "composite" else cfg["sigma"],
               psnr_in=f"{psnr_in:.3f}", psnr_out=f"{psnr_out:.3f}",
-              gain=f"{psnr_out - psnr_in:.3f}", params=n_params,
+              gain=f"{psnr_out - psnr_in:.3f}", ssim=f"{mean_ssim:.4f}", lpips=f"{mean_lpips:.4f}",
+              gflops=f"{cost:.2f}", params=n_params,
               images=len(files), notes=args.notes)
     print(f"appended row to {out_dir / 'benchmark.csv'}")
 
     save_qualitative(samples, out_dir / "figures" / "qualitative.png")
     result = {"method": method, "steps": ck["step"], "images": len(files),
-              "psnr": psnr_out, "params": n_params, "notes": args.notes,
+              "psnr": psnr_out, "ssim": mean_ssim, "lpips": mean_lpips, "gflops": cost,
+              "params": n_params, "notes": args.notes,
               "protocol": "author-cbsd68" if args.author_protocol else "tiled-256-overlap32",
               "source": args.ffdnet_weights or args.ckpt}
     if args.assert_psnr is not None:

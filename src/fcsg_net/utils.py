@@ -59,6 +59,11 @@ class CSVLog:
         if not self.path.exists():
             with self.path.open("w", newline="") as f:
                 csv.writer(f).writerow(fields)
+        else:
+            with self.path.open(newline="") as f:
+                header = next(csv.reader(f), [])
+            if header != list(fields):
+                raise ValueError(f"{self.path} has columns {header}, expected {list(fields)}")
 
     def write(self, **row):
         with self.path.open("a", newline="") as f:

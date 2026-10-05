@@ -1,6 +1,7 @@
-"""Run M1's FFDNet benchmark, M2 checks, and the D2 export on Kaggle/Colab."""
+"""Run M1's FFDNet benchmark, M2 checks, the D2 export, and M3 throughput on Kaggle/Colab."""
 
 import argparse
+import csv
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
@@ -25,6 +26,33 @@ def sha256(path):
         for block in iter(lambda: f.read(1024 * 1024), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def throughput(train, val, out, steps=1000, warmup=200, budget_hours=30):
+    tiles = out / "tiles.npy"
+    subprocess.run([sys.executable, str(ROOT / "training/build_tiles.py"), "--data", str(train),
+                    "--train-dir", str(train), "--val-dir", str(val), "--out", str(tiles)], check=True)
+    result = {"steps_measured": steps, "warmup_steps": warmup, "budget_hours": budget_hours,
+              "note": "tile cache, composite degradation, batch 16; validation and checkpoint time excluded",
+              "models": {}}
+    for config in ("dncnn_composite", "ffdnet_composite", "fcsg"):
+        run = out / "throughput" / config
+        subprocess.run([sys.executable, str(ROOT / "training/train.py"),
+                        "--config", str(ROOT / f"configs/{config}.toml"), "--data", str(train),
+                        "--train-dir", str(train), "--val-dir", str(val), "--tiles", str(tiles),
+                        "--out", str(run), "--steps", str(steps)], check=True)
+        with (run / "train_log.csv").open(newline="") as f:
+            rows = [r for r in csv.DictReader(f) if r["loss"]]
+        first = next(r for r in rows if int(r["step"]) >= warmup)
+        last = rows[-1]
+        rate = (int(last["step"]) - int(first["step"])) / max(int(last["secs"]) - int(first["secs"]), 1)
+        result["models"][config] = {"steps_per_second": rate,
+                                    "steps_in_budget": int(rate * budget_hours * 3600)}
+        for ckpt in run.glob("ckpt_*.pt"):
+            ckpt.unlink()
+    tiles.unlink()
+    (out / "throughput.json").write_text(json.dumps(result, indent=2) + "\n")
+    return result
 
 
 def main():
@@ -81,7 +109,8 @@ def main():
     result.update(archive=Path(archive).name, archive_sha256=sha256(archive),
                   manifest_sha256=sha256(out / "d2/manifest.csv"))
     (out / "phase2_snapshot.json").write_text(json.dumps(result, indent=2) + "\n")
-    print("FFDNet benchmark, Phase 2 checks, and 5,000-pair D2 snapshot passed.", flush=True)
+    print(json.dumps(throughput(train, val, out), indent=2), flush=True)
+    print("FFDNet benchmark, Phase 2 checks, 5,000-pair D2 snapshot, and throughput finished.", flush=True)
 
 
 if __name__ == "__main__":

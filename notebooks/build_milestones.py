@@ -35,6 +35,9 @@ to rebuild the bundle after a code change.
 The FFDNet benchmark uses author-pretrained weights, not a from-scratch training
 run. Phase 2 includes 200 optimization steps and a 5,000-pair export, not full
 model training. Expect the snapshot to take additional CPU time after the GPU checks.
+The last step builds a tile cache and times 1,000 composite-degradation training
+steps for DnCNN, FFDNet, and FCSG-Net. `throughput.json` gives the step count that
+fits 30 GPU-hours per model; set `steps` in the Phase 3 configs from it.
 The actual GPU and measured results are recorded. No gate is claimed to have
 passed before this notebook runs.
 """), cell("code", """from pathlib import Path
@@ -54,19 +57,20 @@ import torch
 assert torch.cuda.is_available(), 'Enable the GPU accelerator before running.'
 print('GPU:', torch.cuda.get_device_name())
 print('Results:', OUT)
-subprocess.run([sys.executable, '-m', 'pip', 'install', 'thop==0.1.1.post2209072238'], check=True)
+subprocess.run([sys.executable, '-m', 'pip', 'install', 'thop==0.1.1.post2209072238', 'lpips==0.1.4'], check=True)
 """), cell("markdown", f"## Bundled source\n\n{len(files)} files; SHA-256 `{digest}`.\n"),
     cell("code", "FILES = " + repr(files) + "\n"
          + f"assert hashlib.sha256(json.dumps(FILES, sort_keys=True).encode()).hexdigest() == {digest!r}\n"
          + "for name, source in FILES.items():\n"
          + "    path = REPO / name\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(source)\n"
          + "os.chdir(REPO)\nprint('Prepared', len(FILES), 'source files in', REPO)\n"),
-    cell("markdown", """## Run the benchmark, model checks, and D2 export
+    cell("markdown", """## Run the benchmark, model checks, D2 export, and throughput
 
 The FFDNet gate requires 31.21 dB ± 0.5 dB on all 68 clean CBSD68 images.
 The architecture checks enforce reconstruction, routing gradients, parameter
 and compute budgets, a 4 GB CUDA allocator limit, and a 200-step overfit test.
-The final export contains 5,000 pairs and the parameters that generated each pair.
+The export contains 5,000 pairs and the parameters that generated each pair.
+Throughput is timed from step 200 to step 1,000 so worker start-up is excluded.
 """), cell("code", """subprocess.run([
     sys.executable, '-u', 'evaluation/run_milestones.py',
     '--data', str(DATA), '--out', str(OUT),
@@ -77,14 +81,15 @@ from IPython.display import FileLink, display
 
 manifest = {name: hashlib.sha256(source.encode()).hexdigest() for name, source in FILES.items()}
 (OUT / 'source_manifest.json').write_text(json.dumps(manifest, indent=2) + '\\n')
-for name in ('ffdnet/evaluation.json', 'phase2_checks.json', 'phase2_snapshot.json'):
+for name in ('ffdnet/evaluation.json', 'phase2_checks.json', 'phase2_snapshot.json', 'throughput.json'):
     result = json.loads((OUT / name).read_text())
     if 'overfit' in result:
         result['overfit'].pop('losses', None)
     print(name, json.dumps(result, indent=2))
 archive = OUT / 'milestone_evidence.zip'
 with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as z:
-    paths = list(OUT.glob('*.json')) + list((OUT / 'ffdnet').rglob('*')) + [OUT / 'd2/manifest.csv']
+    paths = (list(OUT.glob('*.json')) + list((OUT / 'ffdnet').rglob('*')) + [OUT / 'd2/manifest.csv']
+             + list((OUT / 'throughput').rglob('train_log.csv')))
     for path in sorted(paths):
         if path.is_file():
             z.write(path, path.relative_to(OUT))

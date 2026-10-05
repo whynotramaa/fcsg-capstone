@@ -1,0 +1,68 @@
+{
+  "captured_at_utc": "2026-09-30T22:15:01.047873+00:00",
+  "protocol": "Live console; 16 fixed 128x128 validation crops. Rounded values, not final benchmark.",
+  "runs": {
+    "reference": {
+      "kernel": "whynotramaa/fcsg-p3-fcsg-reference",
+      "status": "RUNNING at log snapshot",
+      "planned_steps": 100000,
+      "seed": 1234,
+      "latest_training": {
+        "step": 6000,
+        "loss": 0.0032,
+        "lr": 0.000198,
+        "secs": 1072
+      },
+      "validation": [
+        {
+          "step": 2000,
+          "psnr_in": 21.5,
+          "psnr_out": 25.1
+        },
+        {
+          "step": 4000,
+          "psnr_in": 21.5,
+          "psnr_out": 27.71
+        },
+        {
+          "step": 6000,
+          "psnr_in": 21.5,
+          "psnr_out": 28.07
+        }
+      ],
+      "selfchecks_passed": true,
+      "progress_source": "Kaggle replayed console log, deduplicated by step"
+    },
+    "uniform": {
+      "kernel": "whynotramaa/fcsg-p3-fcsg-uniform",
+      "status": "RUNNING at log snapshot",
+      "planned_steps": 100000,
+      "seed": 1234,
+      "latest_training": {
+        "step": 6250,
+        "loss": 0.03611,
+        "lr": 0.000198,
+        "secs": 993
+      },
+      "validation": [
+        {
+          "step": 2000,
+          "psnr_in": 21.5,
+          "psnr_out": 25.64
+        },
+        {
+          "step": 4000,
+          "psnr_in": 21.5,
+          "psnr_out": 28.11
+        },
+        {
+          "step": 6000,
+          "psnr_in": 21.5,
+          "psnr_out": 28.36
+        }
+      ],
+      "selfchecks_passed": true,
+      "progress_source": "Kaggle replayed console log, deduplicated by step"
+    }
+  }
+}

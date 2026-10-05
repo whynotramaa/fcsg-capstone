@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="396pt" viewBox="0 0 648 396" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-01T04:26:35.075451</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 396 
+L 648 396 
+L 648 0 
+L 0 0 
+z
+" style="fill: #faf9f5"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 17.58816 117.114 
+L 117.55872 117.114 
+L 117.55872 48.672 
+L 17.58816 48.672 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 145.67544 117.114 
+L 251.89416 117.114 
+L 251.89416 48.672 
+L 145.67544 48.672 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 280.01088 117.114 
+L 379.98144 117.114 
+L 379.98144 48.672 
+L 280.01088 48.672 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 408.09816 117.114 
+L 514.31688 117.114 
+L 514.31688 48.672 
+L 408.09816 48.672 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 542.4336 117.114 
+L 629.90784 117.114 
+L 629.90784 48.672 
+L 542.4336 48.672 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 17.58816 281.997 
+L 123.80688 281.997 
+L 123.80688 198 
+L 17.58816 198 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 148.79952 281.997 
+L 273.76272 281.997 
+L 273.76272 198 
+L 148.79952 198 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 301.87944 281.997 
+L 404.97408 281.997 
+L 404.97408 198 
+L 301.87944 198 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 433.0908 281.997 
+L 514.31688 281.997 
+L 514.31688 198 
+L 433.0908 198 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 542.4336 281.997 
+L 629.90784 281.997 
+L 629.90784 198 
+L 542.4336 198 
+z
+" clip-path="url(#paabb8df215)" style="fill: #faf9f5; stroke: #27251f; stroke-width: 0.85; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(44.924307 79.173)">Band RGB</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(47.656182 93.123)">H x W x 3</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(162.118823 79.173)">Pixel unshuffle 2</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(167.671214 93.123)">H/2 x W/2 x 12</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(305.057629 79.173)">1x1, 12 -&gt; 48</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(319.13841 93.123)">ReLU</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(422.297192 65.223)">4 residual blocks</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(433.734739 79.173)">DW K + PW 1</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(450.34977 93.123)">ReLU</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(433.734739 107.073)">DW K + PW 1</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(561.232189 72.198)">1x1, 48 -&gt; 12</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(566.788939 86.148)">shuffle 2</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(562.107697 100.098)">RGB + skip</text>
+   </g>
+   <g id="patch_12">
+    <path d="M 119.559702 82.893 
+Q 131.618147 82.893 142.446754 82.893 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 138.246754 80.793 
+L 142.446754 82.893 
+L 138.246754 84.993 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 253.895142 82.893 
+Q 265.953587 82.893 276.782194 82.893 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 272.582194 80.793 
+L 276.782194 82.893 
+L 272.582194 84.993 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 381.982422 82.893 
+Q 394.040867 82.893 404.869474 82.893 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 400.669474 80.793 
+L 404.869474 82.893 
+L 400.669474 84.993 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 516.317862 82.893 
+Q 528.376307 82.893 539.204914 82.893 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 535.004914 80.793 
+L 539.204914 82.893 
+L 535.004914 84.993 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="17.58816" y="151.335" transform="rotate(-0 17.58816 151.335)">K = 7, 5, or 3. DW is depthwise convolution; PW is pointwise convolution.</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(37.877965 236.2785)">3 bands x RGB</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(45.178465 250.2285)">9 channels</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(168.958128 229.3035)">16x16 local pooling</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(154.901323 243.2535)">mean + squared energy</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(184.269706 257.2035)">18 channels</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(338.276479 229.3035)">1x1 MLP</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(325.372729 243.2535)">18 -&gt; 24 -&gt; 9</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(342.56901 257.2035)">ReLU</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(431.795715 236.2785)">Bilinear upsample</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(448.668676 250.2285)">logits / tau</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(563.892134 229.3035)">Top 2 of 3</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(546.263548 243.2535)">softmax selected</text>
+    <text style="font-size: 9.3px; font-family: 'Poppins'; fill: #27251f" transform="translate(564.530056 257.2035)">zero third</text>
+   </g>
+   <g id="patch_16">
+    <path d="M 125.805193 239.6874 
+Q 136.301688 239.6874 145.568345 239.6874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 141.368345 237.5874 
+L 145.568345 239.6874 
+L 141.368345 241.7874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 275.763702 239.6874 
+Q 287.822147 239.6874 298.650754 239.6874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 294.450754 237.5874 
+L 298.650754 239.6874 
+L 294.450754 241.7874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 406.975062 239.6874 
+Q 419.033507 239.6874 429.862114 239.6874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 425.662114 237.5874 
+L 429.862114 239.6874 
+L 425.662114 241.7874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 516.317862 239.6874 
+Q 528.376307 239.6874 539.204914 239.6874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+    <path d="M 535.004914 237.5874 
+L 539.204914 239.6874 
+L 535.004914 241.7874 
+" style="fill: none; stroke: #27251f; stroke-width: 1.1; stroke-linecap: round"/>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="17.58816" y="334.884" transform="rotate(-0 17.58816 334.884)">Dense softmax is retained for the entropy objective. Sparse maps determine the output mixture.</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="paabb8df215">
+   <rect x="11.34" y="11.34" width="624.816" height="373.32"/>
+  </clipPath>
+ </defs>
+</svg>

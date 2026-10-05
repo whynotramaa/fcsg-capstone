@@ -1,0 +1,19 @@
+{
+  "config": "fcsg",
+  "step": 200000,
+  "steps": 200000,
+  "finished": true,
+  "evaluation": {
+    "method": "fcsg",
+    "steps": 200000,
+    "images": 100,
+    "psnr": 27.24289608001709,
+    "ssim": 0.7529090890288352,
+    "lpips": 0.396130463257432,
+    "gflops": 9.391902846,
+    "params": 97088,
+    "notes": "phase3-div2k-composite",
+    "protocol": "tiled-256-overlap32",
+    "source": "/kaggle/working/ckpt/ckpt_0200000.pt"
+  }
+}

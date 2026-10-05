@@ -1,0 +1,2 @@
+method,steps,degradation,sigma,psnr_in,psnr_out,gain,ssim,lpips,gflops,params,images,notes
+ffdnet_composite,200000,composite,,20.992,28.240,7.247,0.7920,0.3162,27.89,852108,100,phase3-div2k-composite

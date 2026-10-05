@@ -1,0 +1,21 @@
+{
+  "submitted_on": "2026-10-01",
+  "kernel": "whynotramaa/fcsg-p3-diagnostics",
+  "version": 3,
+  "session_limit_seconds": 3600,
+  "status": "COMPLETE",
+  "notebook_sha256": "3ec4939621dc44931dc31fdedd793cd442c2b9b20d3d7d1a01b8e7f8082dfed7",
+  "checkpoint_sources": [
+    "whynotramaa/fcsg-p3-fcsg",
+    "whynotramaa/fcsg-p3-dncnn-composite",
+    "whynotramaa/fcsg-p3-ffdnet-blind",
+    "whynotramaa/fcsg-p3-ffdnet-composite"
+  ],
+  "expected_checkpoint_sha256": {
+    "fcsg": "8db0bb0f3c251ddcf3cb6c852c087a0127b749297a436f526f44f9eb8d3b6920",
+    "dncnn_composite": "afb0abfa022ede04bb90d63c2fbf3c2880bd9cc33e497e50aaf24f7e15c0139b",
+    "ffdnet_blind": "981560c18cbea13749fc400207f8b306015376b2437a3aec9f561d9ea960eb85",
+    "ffdnet_composite": "ef9560e8ed1ebae0a95fbd8503bc378bf98c7feaa316a6425d5eac89dce40f77"
+  },
+  "summary_sha256": "adc68421fa186401676d8a6b4d7a6d9c2c902749a2493bd243eeb57d63d78cda"
+}

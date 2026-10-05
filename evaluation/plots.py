@@ -8,6 +8,7 @@ each series is filtered independently rather than read as a table.
 
 import argparse
 import csv
+import json
 from pathlib import Path
 
 import matplotlib
@@ -74,16 +75,89 @@ def save(fig, path, note=""):
     print(f"wrote {path}  {note}")
 
 
+def plot_diagnostics(root, out):
+    import numpy as np
+
+    root = Path(root)
+    summary = json.loads((root / "summary.json").read_text())
+    rows = json.loads((root / "routing.json").read_text())
+    groups = [[r for r in rows if r["image"] == image] for image in sorted({r["image"] for r in rows})]
+    names = {"fcsg": "FCSG-Net", "dncnn_composite": "DnCNN", "ffdnet_blind": "FFDNet blind"}
+    figures = []
+    fig, axes = plt.subplots(3, 2, figsize=(10, 10))
+    for band in range(3):
+        for col, param in enumerate(("noise_sigma", "jpeg_quality")):
+            ax = axes[band, col]
+            for expert, kernel in enumerate((7, 5, 3)):
+                xs, ys = [], []
+                for group in groups:
+                    x = np.array([r[param] for r in group])
+                    y = np.array([r["mean_weight"][band][expert] for r in group])
+                    xs.extend(x - x.mean())
+                    ys.extend(y - y.mean())
+                r = next(c["r"] for c in summary["routing_correlations"]
+                         if c["band"] == band and c["expert"] == expert and c["parameter"] == param)
+                if r is not None:
+                    assert np.isclose(np.corrcoef(xs, ys)[0, 1], r), "correlation figure disagrees with diagnostic"
+                label = f"{kernel}x{kernel}, r={r:.2f}" if r is not None else f"{kernel}x{kernel}, constant"
+                ax.scatter(xs, ys, s=14, alpha=0.55, label=label)
+            ax.set_title(f"{('Low', 'Mid', 'High')[band]} band")
+            ax.set_xlabel("Noise sigma deviation, 0-255 units" if param == "noise_sigma" else "JPEG quality deviation")
+            ax.set_ylabel("Mean routing weight deviation")
+            ax.legend(fontsize=8)
+            ax.grid(alpha=0.2)
+    fig.suptitle(f"Routing versus degradation, {len(rows)} samples across {len(groups)} images\n"
+                 "Centered within each image; all parameters vary; exploratory correlations", fontsize=12)
+    figures.append((fig, "routing_correlations"))
+
+    benchmark = Path(__file__).resolve().parent.parent / "results" / "benchmark.csv"
+    with benchmark.open(newline="") as f:
+        costs = {r["method"]: float(r["gflops"]) for r in csv.DictReader(f)
+                 if r["method"] in names and r["steps"] == "200000"}
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for method, name in names.items():
+        measurements = summary["models"][method]["latency"]
+        latency = next(r["wall_ms_median"] for r in measurements if r["size"] == 256)
+        ax.scatter(costs[method], latency, s=65)
+        ax.annotate(f"{name}, {latency:.1f} ms", (costs[method], latency), xytext=(7, 7), textcoords="offset points", fontsize=9)
+    ax.set(xlabel="Reported GFLOPs at 256x256", ylabel="Median warmed forward time, ms",
+           title="Tesla T4, 256x256, batch 1, FP32, TF32 disabled", xlim=(0, 95), ylim=(0, 25))
+    ax.grid(alpha=0.2)
+    figures.append((fig, "compute_and_latency"))
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for method, result in summary["models"].items():
+        scores = result["tile_psnr"]
+        sizes = sorted(map(int, scores))
+        ax.plot(sizes, [scores[str(size)] - scores["256"] for size in sizes], marker="o",
+                label=names.get(method, "FFDNet oracle"))
+    ax.axhline(0, color="grey", linestyle="--", linewidth=0.8)
+    ax.set(xlabel="Tile width and height, pixels", ylabel="Mean PSNR change from 256-pixel tiles, dB",
+           title=f"Tile sensitivity, {len(summary['indices'])} fixed images, 32-pixel overlap", xticks=sizes)
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.2)
+    figures.append((fig, "tile_sensitivity"))
+    for fig, name in figures:
+        fig.tight_layout()
+        fig.savefig(out / f"{name}.svg")
+        save(fig, out / f"{name}.png")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", required=True)
+    source = ap.add_mutually_exclusive_group(required=True)
+    source.add_argument("--csv")
+    source.add_argument("--diagnostics", help="directory containing summary.json and routing.json")
     ap.add_argument("--out", default="results/figures")
     args = ap.parse_args()
 
-    with open(args.csv, newline="") as f:
-        rows = list(csv.DictReader(f))
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    if args.diagnostics:
+        plot_diagnostics(args.diagnostics, out)
+        return
+    with open(args.csv, newline="") as f:
+        rows = list(csv.DictReader(f))
 
     loss = series(rows, "loss")
     if loss:
@@ -91,7 +165,7 @@ def main():
         ax.plot(*xy(loss), lw=1)
         ax.set_yscale("log")
         ax.set_xlabel("step")
-        ax.set_ylabel("Charbonnier loss")
+        ax.set_ylabel("Training objective")
         ax.set_title("Training loss")
         ax.grid(alpha=0.3)
         save(fig, out / "loss_curve.png",

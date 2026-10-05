@@ -1,0 +1,45 @@
+{
+  "submitted_on": "2026-10-01",
+  "runs": {
+    "fcsg_reference": {
+      "kernel": "whynotramaa/fcsg-p3-fcsg-reference",
+      "version": 1,
+      "status": "RUNNING",
+      "steps": 100000,
+      "seed": 1234,
+      "session_limit_seconds": 21600,
+      "save_after_hours": 5.5,
+      "notebook_sha256": "f3a1bdc3d7456adc62d69adffc86f8ea23f3fed12873ef6d9cb81978ad124161",
+      "gpu_checks_passed": true,
+      "observed_step": 3000,
+      "observed_training_seconds": 538,
+      "latest_validation": {
+        "step": 2000,
+        "psnr_in": 21.5,
+        "psnr_out": 25.1,
+        "precision": "rounded console values"
+      },
+      "estimated_training_hours_remaining": 4.832037037037038
+    },
+    "fcsg_uniform": {
+      "kernel": "whynotramaa/fcsg-p3-fcsg-uniform",
+      "version": 1,
+      "status": "RUNNING",
+      "steps": 100000,
+      "seed": 1234,
+      "session_limit_seconds": 21600,
+      "save_after_hours": 5.5,
+      "notebook_sha256": "1ec6cd75e8f27981be843d310bd638d158a3e01b96801cbedbed9a59e1b187bf",
+      "gpu_checks_passed": true,
+      "observed_step": 2950,
+      "observed_training_seconds": 470,
+      "latest_validation": {
+        "step": 2000,
+        "psnr_in": 21.5,
+        "psnr_out": 25.64,
+        "precision": "rounded console values"
+      },
+      "estimated_training_hours_remaining": 4.295056497175142
+    }
+  }
+}

@@ -1,0 +1,347 @@
+{
+  "weights_url": "https://github.com/cszn/KAIR/releases/download/v1.0/ffdnet_color.pth",
+  "weights_sha256": "286f04f7e3a20254c067ba95efb5d3339f4fc8a09a365a93cd469184d4cdb279",
+  "weight_source": "author pretrained; not a from-scratch reproduction",
+  "images": [
+    {
+      "name": "101085.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/101085.png",
+      "sha256": "728930f013122b3a8dd038efab0792782137962ae7424176d580c87f3c560b6a"
+    },
+    {
+      "name": "101087.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/101087.png",
+      "sha256": "9bd21e8887ea1ab4820e8614e42dbfb37ee330716637507e1593d4658c3c253f"
+    },
+    {
+      "name": "102061.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/102061.png",
+      "sha256": "8bb146be5bfd09e238e8751877f0bd0e065cab9dda20bc8e9d4e7b30129c94f1"
+    },
+    {
+      "name": "103070.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/103070.png",
+      "sha256": "10ac13a2ffac9ede3d065e524df9a8e79c553cc303fe730935b0f29d7884cc90"
+    },
+    {
+      "name": "105025.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/105025.png",
+      "sha256": "e4bcac97c8ebb80f7c30b6dafe64577af680709b84f3cd0ec16f30cb72c6e3c8"
+    },
+    {
+      "name": "106024.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/106024.png",
+      "sha256": "a5a4cd7adff008fcc97b77cd80d9f27855deabe5f2ad81cb10790c6b9c297ebd"
+    },
+    {
+      "name": "108005.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/108005.png",
+      "sha256": "74bd6aea65b7379d19ca3328eca1b09b6937aef28851e5b4457dedb3239bf022"
+    },
+    {
+      "name": "108070.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/108070.png",
+      "sha256": "54b222064c9a3bf4b778e6bf8f112b7d9e4a7008d9d4d985c851617c147d5169"
+    },
+    {
+      "name": "108082.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/108082.png",
+      "sha256": "dd67d1a1fc44e759e267363b5bc0be5efd95aa1177ab14f9e50170997a63d982"
+    },
+    {
+      "name": "109053.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/109053.png",
+      "sha256": "71d3843a9b5a665a848658312a6053e7a7da0af0094317833328e77b77e29f5b"
+    },
+    {
+      "name": "119082.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/119082.png",
+      "sha256": "e52de05206c86063b8c93e31402f97fe7942ed5655e3eb6c2e6d7b01de57887d"
+    },
+    {
+      "name": "12084.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/12084.png",
+      "sha256": "ae5b4b79fef64795ff2be425d02c9c5d6bdc8480cc9cf381db3ebd7cddcb0d0e"
+    },
+    {
+      "name": "123074.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/123074.png",
+      "sha256": "010480676e00fd7f26c34054ef1e7f951396eed6bb32613f0a5ad03057aae4ea"
+    },
+    {
+      "name": "126007.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/126007.png",
+      "sha256": "74f0e5610a50552efc8e0f3ccaa48a5b5f92b9de77e560d02d262299396c5bf8"
+    },
+    {
+      "name": "130026.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/130026.png",
+      "sha256": "8f3fcd60117b450bf7c3d2648786921e5cd315954880dfb0e3e089d05637f276"
+    },
+    {
+      "name": "134035.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/134035.png",
+      "sha256": "ed5d90e93b19e0eb7103c6a999553c2e36259e66f5013c674b5c11ef18bca321"
+    },
+    {
+      "name": "14037.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/14037.png",
+      "sha256": "b912eafbb74564b251bcefa3bb621c163ada16bb4073ec3e71e4507cae076da3"
+    },
+    {
+      "name": "143090.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/143090.png",
+      "sha256": "5f853e0883c7321fae3276a97799ce8a109bc87d770e67f480d9bff681bae4ce"
+    },
+    {
+      "name": "145086.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/145086.png",
+      "sha256": "bd4f523763889685ee9c992aa80cb319dcb707a632e3f6ff51be95dce3d7e9de"
+    },
+    {
+      "name": "147091.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/147091.png",
+      "sha256": "302df626c225bc8841c0176a5ec7d3f25fc52875f3c9ab37330a89ea0f241429"
+    },
+    {
+      "name": "148026.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/148026.png",
+      "sha256": "c960466c058ebe25728225226974d79eccd60399b08cf0efd6648bae7696153f"
+    },
+    {
+      "name": "148089.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/148089.png",
+      "sha256": "dc7fa80ec7404af0937d2e2fd2378ee02aff2185d7e6e68b5d2758e818d14abe"
+    },
+    {
+      "name": "157055.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/157055.png",
+      "sha256": "1502d3f4c8839b08765b19dec1c264f5a3234f02f7bbff2d48b998003da7706a"
+    },
+    {
+      "name": "159008.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/159008.png",
+      "sha256": "d7c1aa98313e6b96b92af9828a34c90ea0f51502693772af1dbed9c950e0f3b8"
+    },
+    {
+      "name": "160068.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/160068.png",
+      "sha256": "1ff3b5dbbfbd1d014fba184cf9ed82e881bb8727418dcea10c3e1d84e65bf880"
+    },
+    {
+      "name": "16077.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/16077.png",
+      "sha256": "91f622fd634ea20ed3fec00062650379839e24d3943f10cbbd6c97e262a127db"
+    },
+    {
+      "name": "163085.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/163085.png",
+      "sha256": "1f58f5cd31c00334e38d14264fceef114fb7d958187ded82bf09f19f894adddd"
+    },
+    {
+      "name": "167062.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/167062.png",
+      "sha256": "6ce71248c20d35bd59c10c8623d18502005b231b6430a5b967b859edb4bed101"
+    },
+    {
+      "name": "167083.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/167083.png",
+      "sha256": "59878a27cd05fab3b2c629cfaa5243b44ecc8352c2969660a6363cd78c7530b7"
+    },
+    {
+      "name": "170057.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/170057.png",
+      "sha256": "5507d8205148540d172dd40aa0c1fc07298d73351dd18a8980ff0d033f62d89f"
+    },
+    {
+      "name": "175032.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/175032.png",
+      "sha256": "818c0249759eac78fb933c1f35e72b9358bd2c2902d8db0ef5aaf88e8ce1c78f"
+    },
+    {
+      "name": "175043.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/175043.png",
+      "sha256": "661b9deb5cbb956c18a6298b53d4a188584103bdeff4cefd415c858d094e51da"
+    },
+    {
+      "name": "182053.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/182053.png",
+      "sha256": "3543814626f50cba23ea39cfc8449160bd5e9d23ce79427e2fa0dbedf51529ff"
+    },
+    {
+      "name": "189080.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/189080.png",
+      "sha256": "a0561b8cdaf074a4461a1d7d509ae11851df81d8b5e78d622c35a0e763a1f878"
+    },
+    {
+      "name": "19021.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/19021.png",
+      "sha256": "0eb3719f03f6d64bb855749b3631d86329652f6f585faf367a7f1b8d1c6a38c6"
+    },
+    {
+      "name": "196073.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/196073.png",
+      "sha256": "f46048c149e2246b731e07cc1d8b828d8a7c4e24efbe83f8cb1671a50da4cacb"
+    },
+    {
+      "name": "197017.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/197017.png",
+      "sha256": "bb584785dccca1bac843df70ce85cd9c7f2e219d013612ceac1e7c4632f70eb0"
+    },
+    {
+      "name": "208001.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/208001.png",
+      "sha256": "d9b7a3318a4d3d28a51cc1dd89ba8f6b5e54e99664a30e37c6fa95e9371830f6"
+    },
+    {
+      "name": "210088.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/210088.png",
+      "sha256": "d8bc8cc7dacda5b31205ec2acbe79548dbae4acb21dd5ff2c37f3166868410f5"
+    },
+    {
+      "name": "21077.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/21077.png",
+      "sha256": "8a25f49a01823055b44800c57710125caf20ba47ef43d63353f3c7cbc7fd2a62"
+    },
+    {
+      "name": "216081.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/216081.png",
+      "sha256": "f173dcc973ba2d30e4a339dfb42d3970684d5a5ee2bf94d1d7afba125645c3c0"
+    },
+    {
+      "name": "219090.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/219090.png",
+      "sha256": "eae5439a6f090cb855e116349c6d2f0dc75c4b0fc1f321ddbd54108b4a0814bc"
+    },
+    {
+      "name": "220075.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/220075.png",
+      "sha256": "cd57b3b126f9df99f9dfdba925f8fe9647997f46b8ca21d56c2cd24e20a2da0c"
+    },
+    {
+      "name": "223061.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/223061.png",
+      "sha256": "ce4d5dc962e35de2d8797f4208681b5f677314cb240f2b7523bdc4167bf17a81"
+    },
+    {
+      "name": "227092.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/227092.png",
+      "sha256": "527a52bd1cc9bff1ba1306aa0cd2e5360a99a7baae20ecdc6b555517b1dca1d9"
+    },
+    {
+      "name": "229036.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/229036.png",
+      "sha256": "551ff3d472c01626ec7d844c8df57395babdc4787d515de69ce4d488aa740dfa"
+    },
+    {
+      "name": "236037.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/236037.png",
+      "sha256": "94a9c48c3031f17ea0bb9aa9fa934a64832b130032ce88c2860628f0b7ba9683"
+    },
+    {
+      "name": "24077.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/24077.png",
+      "sha256": "227b148322970e2b4321efc94e1155773dd24ed1b83a29e36c26488f9ca56d42"
+    },
+    {
+      "name": "241004.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/241004.png",
+      "sha256": "abda35d0064e8fb2ac1250afc7cf59eb68a911fc67166ddf6a07c0c9bc00de26"
+    },
+    {
+      "name": "241048.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/241048.png",
+      "sha256": "17e16350f28ad8b730285875d301cd703046e6f4da17ca8beff56853445e0320"
+    },
+    {
+      "name": "253027.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/253027.png",
+      "sha256": "bc82f560cd96e36e1931b07a917a3aa2c9f23cd761894496d6040bb2ef10dfb2"
+    },
+    {
+      "name": "253055.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/253055.png",
+      "sha256": "dfee71b92b4f9249badb9191cd1809156076fd60a4c06b8201dc0ce901248b60"
+    },
+    {
+      "name": "260058.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/260058.png",
+      "sha256": "d2c3752f0eb867ea0716dce082ae7e6e7049c180a5f8ad133896048a0ff51cf2"
+    },
+    {
+      "name": "271035.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/271035.png",
+      "sha256": "325d6b06eb92141fa04fe85215a57556a5a5798c4c0069c462af969f6e22e236"
+    },
+    {
+      "name": "285079.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/285079.png",
+      "sha256": "570c78b6bc20c0325a09077520631fe338b05b41ea983076fd536cdb9a588563"
+    },
+    {
+      "name": "291000.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/291000.png",
+      "sha256": "3922b3013c08df357b62008c76b18999c9fc851ad094944078e0830d2005e6fa"
+    },
+    {
+      "name": "295087.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/295087.png",
+      "sha256": "5bb069fca2edacb409074733cc01f60f9eb67f56267e11fc0cee3d94a59d018f"
+    },
+    {
+      "name": "296007.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/296007.png",
+      "sha256": "54f5531e29e6ea2edd7faeee8d40a6e7b0c0ebfb9f4ea6bf0d62d097a1b4d418"
+    },
+    {
+      "name": "296059.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/296059.png",
+      "sha256": "cef7442078e4816f318f4d4eac94c0edcd7d3abf1adf0a81a22289c3c8822db7"
+    },
+    {
+      "name": "299086.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/299086.png",
+      "sha256": "f79e12530418ba5598bcfc630f88214ea9e14d6346aa2241bbd7d7fec2146c75"
+    },
+    {
+      "name": "300091.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/300091.png",
+      "sha256": "f2d7452aa683b701384c9b48992941b3776d223f426f47be93a92e7fe50917df"
+    },
+    {
+      "name": "302008.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/302008.png",
+      "sha256": "573eb125df61533d3acc52297f39229fdb106490d65363269a0be60fd388552a"
+    },
+    {
+      "name": "304034.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/304034.png",
+      "sha256": "3f0eb1020b1c9050597519820000429caacf52156cb76b0dc50ebb47194296cc"
+    },
+    {
+      "name": "304074.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/304074.png",
+      "sha256": "4bacdc6cde1965fcabbf6be7cdafd69307bce5fdcaa28cac05933bf587409515"
+    },
+    {
+      "name": "306005.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/306005.png",
+      "sha256": "aaff1715bffdf33245181493bb946f6c9243c8a72f3b2eb4db019e8b504aceab"
+    },
+    {
+      "name": "3096.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/3096.png",
+      "sha256": "cfb0bf09e2204a8073f0c6bbbf0a2fe9624c9de0709206e0be78843c4b140f09"
+    },
+    {
+      "name": "33039.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/33039.png",
+      "sha256": "c120304970c037f44214743b175c28b1b0d5caea1263e78b5fea156aca7cb664"
+    },
+    {
+      "name": "351093.png",
+      "url": "https://raw.githubusercontent.com/cszn/FFDNet/master/testsets/CBSD68/351093.png",
+      "sha256": "f9dc764a64ed52a1abad50d4c1e890d73211d823ed4a440d24d9518d85a2931d"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ Working plan for the B.Tech research project (CP-I), Autumn 2026-27. Written
 
 Execution uses Kaggle or Colab. The local NVIDIA driver is unavailable.
 See `results/milestone_status.md` for implemented work and pending measurements.
-The self-contained `notebooks/phase1_phase2.ipynb` runs the remaining M1/M2 gates.
+The M1/M2 gates passed on 2026-09-23. `notebooks/phase1_phase2.ipynb` now also measures Phase 3 throughput.
 
 ## 0. Read this before you write code
 
@@ -276,13 +276,22 @@ The scaffold already has the right directories. Fill them like this:
 ```
 src/fcsg_net/   data.py  degrade.py  metrics.py  utils.py
 models/         fcsg.py  dncnn.py  ffdnet.py  blocks.py
-training/       train.py  config-driven, one entry point for all models
-evaluation/     eval.py  ablate.py  visualize_routing.py
-configs/        base.yaml  fcsg.yaml  a1..a4.yaml
+training/       train.py  build_tiles.py   config-driven, one entry point for all models
+evaluation/     eval.py  checks.py  run_milestones.py  plots.py  report.py
+                ablate.py  visualize_routing.py   (Phase 4, not written yet)
+configs/        dncnn.toml  ffdnet.toml  fcsg.toml   Phase 1 Gaussian and Phase 2 checks
+                dncnn_composite.toml  ffdnet_composite.toml  ffdnet_blind.toml
+                a1..a4.toml   (Phase 4, not written yet)
 notebooks/      kaggle_train.ipynb  thin wrapper that calls training/train.py
+                phase1_phase2.ipynb  bundled milestone run, rebuilt by build_milestones.py
 results/        benchmark.csv  figures/
 checkpoints/    gitignored
 ```
+
+FFDNet runs twice in Phase 3. `ffdnet_composite.toml` gives it the recorded
+noise sigma, a non-blind upper bound. `ffdnet_blind.toml` fixes the map at
+27.5/255, the middle of the noise range, so it sees no more than DnCNN and
+FCSG-Net do. Report both rows.
 
 One `train.py` driven by config files, not one script per model. The ablations
 then become config diffs, which is also how you keep them honest.

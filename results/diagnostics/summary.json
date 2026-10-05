@@ -1,0 +1,395 @@
+{
+  "gpu": "Tesla T4",
+  "torch": "2.10.0+cu128",
+  "cuda": "12.8",
+  "precision": "float32, TF32 disabled",
+  "batch": 1,
+  "tile_overlap": 32,
+  "indices": [
+    0,
+    11,
+    22,
+    33,
+    44,
+    55,
+    66,
+    77,
+    88,
+    99
+  ],
+  "latency_note": "warm forward pass only; excludes image transfers and degradation",
+  "routing_note": "256-pixel center crops of whole-image degradations; exploratory correlations, all parameters vary",
+  "intervention_note": "inference-only substitutions with the same trained weights, not retrained A2",
+  "models": {
+    "fcsg": {
+      "checkpoint": "/kaggle/input/notebooks/whynotramaa/fcsg-p3-fcsg/ckpt/ckpt_0200000.pt",
+      "checkpoint_sha256": "8db0bb0f3c251ddcf3cb6c852c087a0127b749297a436f526f44f9eb8d3b6920",
+      "latency": [
+        {
+          "size": 128,
+          "gpu_ms_median": 5.077055931091309,
+          "wall_ms_median": 5.1038699999708115,
+          "wall_ms_p90": 7.745335800041175,
+          "peak_allocated_bytes": 13004288,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 256,
+          "gpu_ms_median": 19.3538875579834,
+          "wall_ms_median": 19.399206499940647,
+          "wall_ms_p90": 19.647368900052697,
+          "peak_allocated_bytes": 51258880,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 512,
+          "gpu_ms_median": 75.54156875610352,
+          "wall_ms_median": 75.59379399998534,
+          "wall_ms_p90": 76.23273769994512,
+          "peak_allocated_bytes": 201747968,
+          "warmup": 20,
+          "repeats": 50
+        }
+      ],
+      "tile_psnr": {
+        "128": 26.62207794189453,
+        "256": 26.658692359924316,
+        "512": 26.671968269348145
+      }
+    },
+    "dncnn_composite": {
+      "checkpoint": "/kaggle/input/notebooks/whynotramaa/fcsg-p3-dncnn-composite/ckpt/ckpt_0200000.pt",
+      "checkpoint_sha256": "afb0abfa022ede04bb90d63c2fbf3c2880bd9cc33e497e50aaf24f7e15c0139b",
+      "latency": [
+        {
+          "size": 128,
+          "gpu_ms_median": 4.20084810256958,
+          "wall_ms_median": 4.224314000055074,
+          "wall_ms_p90": 4.30749070001184,
+          "peak_allocated_bytes": 12047360,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 256,
+          "gpu_ms_median": 17.998271942138672,
+          "wall_ms_median": 18.037080499993863,
+          "wall_ms_p90": 18.156962800003384,
+          "peak_allocated_bytes": 37803008,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 512,
+          "gpu_ms_median": 72.4080810546875,
+          "wall_ms_median": 72.47078549994512,
+          "wall_ms_p90": 72.80151570000726,
+          "peak_allocated_bytes": 140825600,
+          "warmup": 20,
+          "repeats": 50
+        }
+      ],
+      "tile_psnr": {
+        "128": 27.329544639587404,
+        "256": 27.340979766845702,
+        "512": 27.34340305328369
+      }
+    },
+    "ffdnet_blind": {
+      "checkpoint": "/kaggle/input/notebooks/whynotramaa/fcsg-p3-ffdnet-blind/ckpt/ckpt_0200000.pt",
+      "checkpoint_sha256": "981560c18cbea13749fc400207f8b306015376b2437a3aec9f561d9ea960eb85",
+      "latency": [
+        {
+          "size": 128,
+          "gpu_ms_median": 1.6599040031433105,
+          "wall_ms_median": 1.6866865000224607,
+          "wall_ms_p90": 1.735833199938952,
+          "peak_allocated_bytes": 8887296,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 256,
+          "gpu_ms_median": 6.270992040634155,
+          "wall_ms_median": 6.298282499983543,
+          "wall_ms_p90": 6.563519299925247,
+          "peak_allocated_bytes": 20192256,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 512,
+          "gpu_ms_median": 24.089136123657227,
+          "wall_ms_median": 24.123997999993207,
+          "wall_ms_p90": 24.445403500021712,
+          "peak_allocated_bytes": 65412096,
+          "warmup": 20,
+          "repeats": 50
+        }
+      ],
+      "tile_psnr": {
+        "128": 27.69552116394043,
+        "256": 27.71385612487793,
+        "512": 27.72116165161133
+      }
+    },
+    "ffdnet_composite": {
+      "checkpoint": "/kaggle/input/notebooks/whynotramaa/fcsg-p3-ffdnet-composite/ckpt/ckpt_0200000.pt",
+      "checkpoint_sha256": "ef9560e8ed1ebae0a95fbd8503bc378bf98c7feaa316a6425d5eac89dce40f77",
+      "latency": [
+        {
+          "size": 128,
+          "gpu_ms_median": 1.665776014328003,
+          "wall_ms_median": 1.6876089999868782,
+          "wall_ms_p90": 1.7344290999176337,
+          "peak_allocated_bytes": 8887296,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 256,
+          "gpu_ms_median": 6.317456007003784,
+          "wall_ms_median": 6.348492000029182,
+          "wall_ms_p90": 6.456249999928332,
+          "peak_allocated_bytes": 20192256,
+          "warmup": 20,
+          "repeats": 50
+        },
+        {
+          "size": 512,
+          "gpu_ms_median": 24.581984519958496,
+          "wall_ms_median": 24.62040599999682,
+          "wall_ms_p90": 24.78612689998272,
+          "peak_allocated_bytes": 65412096,
+          "warmup": 20,
+          "repeats": 50
+        }
+      ],
+      "tile_psnr": {
+        "128": 27.73005428314209,
+        "256": 27.748235321044923,
+        "512": 27.755766677856446
+      }
+    }
+  },
+  "routing_correlations": [
+    {
+      "band": 0,
+      "expert": 0,
+      "parameter": "blur_sigma",
+      "r": 0.11532351921588897
+    },
+    {
+      "band": 0,
+      "expert": 0,
+      "parameter": "scale",
+      "r": -0.012837154880695449
+    },
+    {
+      "band": 0,
+      "expert": 0,
+      "parameter": "noise_sigma",
+      "r": -0.727879928583414
+    },
+    {
+      "band": 0,
+      "expert": 0,
+      "parameter": "jpeg_quality",
+      "r": -0.32064262402240185
+    },
+    {
+      "band": 0,
+      "expert": 1,
+      "parameter": "blur_sigma",
+      "r": -0.17106590184663537
+    },
+    {
+      "band": 0,
+      "expert": 1,
+      "parameter": "scale",
+      "r": 0.07232571374970276
+    },
+    {
+      "band": 0,
+      "expert": 1,
+      "parameter": "noise_sigma",
+      "r": 0.7978004346659482
+    },
+    {
+      "band": 0,
+      "expert": 1,
+      "parameter": "jpeg_quality",
+      "r": 0.37167385674463316
+    },
+    {
+      "band": 0,
+      "expert": 2,
+      "parameter": "blur_sigma",
+      "r": 0.16016666345516967
+    },
+    {
+      "band": 0,
+      "expert": 2,
+      "parameter": "scale",
+      "r": -0.09878160295104375
+    },
+    {
+      "band": 0,
+      "expert": 2,
+      "parameter": "noise_sigma",
+      "r": -0.5826202588500238
+    },
+    {
+      "band": 0,
+      "expert": 2,
+      "parameter": "jpeg_quality",
+      "r": -0.28738868448369287
+    },
+    {
+      "band": 1,
+      "expert": 0,
+      "parameter": "blur_sigma",
+      "r": 0.20359492273096086
+    },
+    {
+      "band": 1,
+      "expert": 0,
+      "parameter": "scale",
+      "r": -0.004903668297673978
+    },
+    {
+      "band": 1,
+      "expert": 0,
+      "parameter": "noise_sigma",
+      "r": -0.6756847817385183
+    },
+    {
+      "band": 1,
+      "expert": 0,
+      "parameter": "jpeg_quality",
+      "r": -0.18358773712617188
+    },
+    {
+      "band": 1,
+      "expert": 1,
+      "parameter": "blur_sigma",
+      "r": -0.011250747245411696
+    },
+    {
+      "band": 1,
+      "expert": 1,
+      "parameter": "scale",
+      "r": 0.009690194043440748
+    },
+    {
+      "band": 1,
+      "expert": 1,
+      "parameter": "noise_sigma",
+      "r": -0.2272432809161204
+    },
+    {
+      "band": 1,
+      "expert": 1,
+      "parameter": "jpeg_quality",
+      "r": -0.39106902582408753
+    },
+    {
+      "band": 1,
+      "expert": 2,
+      "parameter": "blur_sigma",
+      "r": -0.20054534802078625
+    },
+    {
+      "band": 1,
+      "expert": 2,
+      "parameter": "scale",
+      "r": 0.0011171217243985752
+    },
+    {
+      "band": 1,
+      "expert": 2,
+      "parameter": "noise_sigma",
+      "r": 0.7698638626987694
+    },
+    {
+      "band": 1,
+      "expert": 2,
+      "parameter": "jpeg_quality",
+      "r": 0.33899921296037044
+    },
+    {
+      "band": 2,
+      "expert": 0,
+      "parameter": "blur_sigma",
+      "r": -0.3723002143717081
+    },
+    {
+      "band": 2,
+      "expert": 0,
+      "parameter": "scale",
+      "r": -0.24875635851860278
+    },
+    {
+      "band": 2,
+      "expert": 0,
+      "parameter": "noise_sigma",
+      "r": 0.03297804668268279
+    },
+    {
+      "band": 2,
+      "expert": 0,
+      "parameter": "jpeg_quality",
+      "r": -0.3190171583942906
+    },
+    {
+      "band": 2,
+      "expert": 1,
+      "parameter": "blur_sigma",
+      "r": 0.423598015943508
+    },
+    {
+      "band": 2,
+      "expert": 1,
+      "parameter": "scale",
+      "r": 0.25797011788947777
+    },
+    {
+      "band": 2,
+      "expert": 1,
+      "parameter": "noise_sigma",
+      "r": -0.2290741734670042
+    },
+    {
+      "band": 2,
+      "expert": 1,
+      "parameter": "jpeg_quality",
+      "r": 0.26400852618539794
+    },
+    {
+      "band": 2,
+      "expert": 2,
+      "parameter": "blur_sigma",
+      "r": -0.1597065267557097
+    },
+    {
+      "band": 2,
+      "expert": 2,
+      "parameter": "scale",
+      "r": -0.0026599321538045046
+    },
+    {
+      "band": 2,
+      "expert": 2,
+      "parameter": "noise_sigma",
+      "r": 0.809430122774666
+    },
+    {
+      "band": 2,
+      "expert": 2,
+      "parameter": "jpeg_quality",
+      "r": 0.27403085092500706
+    }
+  ]
+}

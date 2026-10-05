@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="648pt" height="252pt" viewBox="0 0 648 252" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-01T04:26:37.409209</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 252 
+L 648 252 
+L 648 0 
+L 0 0 
+z
+" style="fill: #faf9f5"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 55.14 203.76 
+L 314.37 203.76 
+L 314.37 11.34 
+L 55.14 11.34 
+z
+" style="fill: #faf9f5"/>
+   </g>
+   <g id="PathCollection_1">
+    <defs>
+     <path id="m7fb0416f49" d="M 0 3.708099 
+C 0.983399 3.708099 1.926654 3.317391 2.622022 2.622022 
+C 3.317391 1.926654 3.708099 0.983399 3.708099 0 
+C 3.708099 -0.983399 3.317391 -1.926654 2.622022 -2.622022 
+C 1.926654 -3.317391 0.983399 -3.708099 0 -3.708099 
+C -0.983399 -3.708099 -1.926654 -3.317391 -2.622022 -2.622022 
+C -3.317391 -1.926654 -3.708099 -0.983399 -3.708099 0 
+C -3.708099 0.983399 -3.317391 1.926654 -2.622022 2.622022 
+C -1.926654 3.317391 -0.983399 3.708099 0 3.708099 
+z
+" style="stroke: #bd654d"/>
+    </defs>
+    <g clip-path="url(#p967577f6a9)">
+     <use xlink:href="#m7fb0416f49" x="79.48663" y="172.601291" style="fill: #bd654d; stroke: #bd654d"/>
+    </g>
+   </g>
+   <g id="PathCollection_2">
+    <defs>
+     <path id="mde2339328e" d="M 0 3.708099 
+C 0.983399 3.708099 1.926654 3.317391 2.622022 2.622022 
+C 3.317391 1.926654 3.708099 0.983399 3.708099 0 
+C 3.708099 -0.983399 3.317391 -1.926654 2.622022 -2.622022 
+C 1.926654 -3.317391 0.983399 -3.708099 0 -3.708099 
+C -0.983399 -3.708099 -1.926654 -3.317391 -2.622022 -2.622022 
+C -3.317391 -1.926654 -3.708099 -0.983399 -3.708099 0 
+C -3.708099 0.983399 -3.317391 1.926654 -2.622022 2.622022 
+C -1.926654 3.317391 -0.983399 3.708099 0 3.708099 
+z
+" style="stroke: #7c8170"/>
+    </defs>
+    <g clip-path="url(#p967577f6a9)">
+     <use xlink:href="#mde2339328e" x="245.502633" y="97.177452" style="fill: #7c8170; stroke: #7c8170"/>
+    </g>
+   </g>
+   <g id="PathCollection_3">
+    <defs>
+     <path id="mb0c99de968" d="M 0 3.708099 
+C 0.983399 3.708099 1.926654 3.317391 2.622022 2.622022 
+C 3.317391 1.926654 3.708099 0.983399 3.708099 0 
+C 3.708099 -0.983399 3.317391 -1.926654 2.622022 -2.622022 
+C 1.926654 -3.317391 0.983399 -3.708099 0 -3.708099 
+C -0.983399 -3.708099 -1.926654 -3.317391 -2.622022 -2.622022 
+C -3.317391 -1.926654 -3.708099 -0.983399 -3.708099 0 
+C -3.708099 0.983399 -3.317391 1.926654 -2.622022 2.622022 
+C -1.926654 3.317391 -0.983399 3.708099 0 3.708099 
+z
+" style="stroke: #ac936d"/>
+    </defs>
+    <g clip-path="url(#p967577f6a9)">
+     <use xlink:href="#mb0c99de968" x="127.431156" y="51.113634" style="fill: #ac936d; stroke: #ac936d"/>
+    </g>
+   </g>
+   <g id="PathCollection_4">
+    <defs>
+     <path id="m21c93f2183" d="M 0 3.708099 
+C 0.983399 3.708099 1.926654 3.317391 2.622022 2.622022 
+C 3.317391 1.926654 3.708099 0.983399 3.708099 0 
+C 3.708099 -0.983399 3.317391 -1.926654 2.622022 -2.622022 
+C 1.926654 -3.317391 0.983399 -3.708099 0 -3.708099 
+C -0.983399 -3.708099 -1.926654 -3.317391 -2.622022 -2.622022 
+C -3.317391 -1.926654 -3.708099 -0.983399 -3.708099 0 
+C -3.708099 0.983399 -3.317391 1.926654 -2.622022 2.622022 
+C -1.926654 3.317391 -0.983399 3.708099 0 3.708099 
+z
+" style="stroke: #758496"/>
+    </defs>
+    <g clip-path="url(#p967577f6a9)">
+     <use xlink:href="#m21c93f2183" x="127.431156" y="44.751434" style="fill: #758496; stroke: #758496"/>
+    </g>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 55.14 203.76 
+L 55.14 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2"/>
+     <g id="text_1">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="55.14" y="220.1065" transform="rotate(-0 55.14 220.1065)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 106.986 203.76 
+L 106.986 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4"/>
+     <g id="text_2">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="106.986" y="220.1065" transform="rotate(-0 106.986 220.1065)">20</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 158.832 203.76 
+L 158.832 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6"/>
+     <g id="text_3">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="158.832" y="220.1065" transform="rotate(-0 158.832 220.1065)">40</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 210.678 203.76 
+L 210.678 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8"/>
+     <g id="text_4">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="210.678" y="220.1065" transform="rotate(-0 210.678 220.1065)">60</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 262.524 203.76 
+L 262.524 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10"/>
+     <g id="text_5">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="262.524" y="220.1065" transform="rotate(-0 262.524 220.1065)">80</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_11">
+      <path d="M 314.37 203.76 
+L 314.37 11.34 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12"/>
+     <g id="text_6">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="314.37" y="220.1065" transform="rotate(-0 314.37 220.1065)">100</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 10px; font-family: 'Poppins'; text-anchor: middle; fill: #27251f" x="184.755" y="237.35" transform="rotate(-0 184.755 237.35)">Reported GFLOPs at 256x256</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_13">
+      <path d="M 55.14 203.76 
+L 314.37 203.76 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14"/>
+     <g id="text_8">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="208.43325" transform="rotate(-0 48.14 208.43325)">27.0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_15">
+      <path d="M 55.14 178.104 
+L 314.37 178.104 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_16"/>
+     <g id="text_9">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="182.77725" transform="rotate(-0 48.14 182.77725)">27.2</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_17">
+      <path d="M 55.14 152.448 
+L 314.37 152.448 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_18"/>
+     <g id="text_10">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="157.12125" transform="rotate(-0 48.14 157.12125)">27.4</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_19">
+      <path d="M 55.14 126.792 
+L 314.37 126.792 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_20"/>
+     <g id="text_11">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="131.46525" transform="rotate(-0 48.14 131.46525)">27.6</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_21">
+      <path d="M 55.14 101.136 
+L 314.37 101.136 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_22"/>
+     <g id="text_12">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="105.80925" transform="rotate(-0 48.14 105.80925)">27.8</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_23">
+      <path d="M 55.14 75.48 
+L 314.37 75.48 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_24"/>
+     <g id="text_13">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="80.15325" transform="rotate(-0 48.14 80.15325)">28.0</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_25">
+      <path d="M 55.14 49.824 
+L 314.37 49.824 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_26"/>
+     <g id="text_14">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="54.49725" transform="rotate(-0 48.14 54.49725)">28.2</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_27">
+      <path d="M 55.14 24.168 
+L 314.37 24.168 
+" clip-path="url(#p967577f6a9)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_28"/>
+     <g id="text_15">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="48.14" y="28.84125" transform="rotate(-0 48.14 28.84125)">28.4</text>
+     </g>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 10px; font-family: 'Poppins'; text-anchor: middle; fill: #27251f" x="18.32" y="107.55" transform="rotate(-90 18.32 107.55)">100-image PSNR (dB)</text>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 55.14 203.76 
+L 55.14 11.34 
+" style="fill: none; stroke: #dedbd2; stroke-width: 0.65; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 55.14 203.76 
+L 314.37 203.76 
+" style="fill: none; stroke: #dedbd2; stroke-width: 0.65; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="83.48663" y="164.601291" transform="rotate(-0 83.48663 164.601291)">FCSG-Net</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="249.502633" y="89.177452" transform="rotate(-0 249.502633 89.177452)">DnCNN</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="131.431156" y="65.113634" transform="rotate(-0 131.431156 65.113634)">FFDNet blind</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="131.431156" y="36.751434" transform="rotate(-0 131.431156 36.751434)">FFDNet oracle</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_5">
+    <path d="M 377.43 203.76 
+L 636.66 203.76 
+L 636.66 11.34 
+L 377.43 11.34 
+z
+" style="fill: #faf9f5"/>
+   </g>
+   <g id="PathCollection_5">
+    <g clip-path="url(#pa28c0babda)">
+     <use xlink:href="#m7fb0416f49" x="570.84755" y="172.601291" style="fill: #bd654d; stroke: #bd654d"/>
+    </g>
+   </g>
+   <g id="PathCollection_6">
+    <g clip-path="url(#pa28c0babda)">
+     <use xlink:href="#mde2339328e" x="557.26663" y="97.177452" style="fill: #7c8170; stroke: #7c8170"/>
+    </g>
+   </g>
+   <g id="PathCollection_7">
+    <g clip-path="url(#pa28c0babda)">
+     <use xlink:href="#mb0c99de968" x="440.226299" y="51.113634" style="fill: #ac936d; stroke: #ac936d"/>
+    </g>
+   </g>
+   <g id="PathCollection_8">
+    <g clip-path="url(#pa28c0babda)">
+     <use xlink:href="#m21c93f2183" x="440.726907" y="44.751434" style="fill: #758496; stroke: #758496"/>
+    </g>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_7">
+     <g id="line2d_29">
+      <path d="M 377.43 203.76 
+L 377.43 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_30"/>
+     <g id="text_21">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="377.43" y="220.1065" transform="rotate(-0 377.43 220.1065)">0</text>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_31">
+      <path d="M 427.281923 203.76 
+L 427.281923 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_32"/>
+     <g id="text_22">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="427.281923" y="220.1065" transform="rotate(-0 427.281923 220.1065)">5</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_33">
+      <path d="M 477.133846 203.76 
+L 477.133846 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_34"/>
+     <g id="text_23">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="477.133846" y="220.1065" transform="rotate(-0 477.133846 220.1065)">10</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_35">
+      <path d="M 526.985769 203.76 
+L 526.985769 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_36"/>
+     <g id="text_24">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="526.985769" y="220.1065" transform="rotate(-0 526.985769 220.1065)">15</text>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_37">
+      <path d="M 576.837692 203.76 
+L 576.837692 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_38"/>
+     <g id="text_25">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="576.837692" y="220.1065" transform="rotate(-0 576.837692 220.1065)">20</text>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_39">
+      <path d="M 626.689615 203.76 
+L 626.689615 11.34 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_40"/>
+     <g id="text_26">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: middle; fill: #68665b" x="626.689615" y="220.1065" transform="rotate(-0 626.689615 220.1065)">25</text>
+     </g>
+    </g>
+    <g id="text_27">
+     <text style="font-size: 10px; font-family: 'Poppins'; text-anchor: middle; fill: #27251f" x="507.045" y="237.35" transform="rotate(-0 507.045 237.35)">Measured 256x256 forward latency (ms)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_9">
+     <g id="line2d_41">
+      <path d="M 377.43 203.76 
+L 636.66 203.76 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_42"/>
+     <g id="text_28">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="208.43325" transform="rotate(-0 370.43 208.43325)">27.0</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_43">
+      <path d="M 377.43 178.104 
+L 636.66 178.104 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_44"/>
+     <g id="text_29">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="182.77725" transform="rotate(-0 370.43 182.77725)">27.2</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_45">
+      <path d="M 377.43 152.448 
+L 636.66 152.448 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_46"/>
+     <g id="text_30">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="157.12125" transform="rotate(-0 370.43 157.12125)">27.4</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_47">
+      <path d="M 377.43 126.792 
+L 636.66 126.792 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_48"/>
+     <g id="text_31">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="131.46525" transform="rotate(-0 370.43 131.46525)">27.6</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_49">
+      <path d="M 377.43 101.136 
+L 636.66 101.136 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_50"/>
+     <g id="text_32">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="105.80925" transform="rotate(-0 370.43 105.80925)">27.8</text>
+     </g>
+    </g>
+    <g id="ytick_14">
+     <g id="line2d_51">
+      <path d="M 377.43 75.48 
+L 636.66 75.48 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_52"/>
+     <g id="text_33">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="80.15325" transform="rotate(-0 370.43 80.15325)">28.0</text>
+     </g>
+    </g>
+    <g id="ytick_15">
+     <g id="line2d_53">
+      <path d="M 377.43 49.824 
+L 636.66 49.824 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_54"/>
+     <g id="text_34">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="54.49725" transform="rotate(-0 370.43 54.49725)">28.2</text>
+     </g>
+    </g>
+    <g id="ytick_16">
+     <g id="line2d_55">
+      <path d="M 377.43 24.168 
+L 636.66 24.168 
+" clip-path="url(#pa28c0babda)" style="fill: none; stroke: #dedbd2; stroke-opacity: 0.7; stroke-width: 0.55; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_56"/>
+     <g id="text_35">
+      <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: end; fill: #68665b" x="370.43" y="28.84125" transform="rotate(-0 370.43 28.84125)">28.4</text>
+     </g>
+    </g>
+    <g id="text_36">
+     <text style="font-size: 10px; font-family: 'Poppins'; text-anchor: middle; fill: #27251f" x="340.61" y="107.55" transform="rotate(-90 340.61 107.55)">100-image PSNR (dB)</text>
+    </g>
+   </g>
+   <g id="patch_6">
+    <path d="M 377.43 203.76 
+L 377.43 11.34 
+" style="fill: none; stroke: #dedbd2; stroke-width: 0.65; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 377.43 203.76 
+L 636.66 203.76 
+" style="fill: none; stroke: #dedbd2; stroke-width: 0.65; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_37">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="574.84755" y="164.601291" transform="rotate(-0 574.84755 164.601291)">FCSG-Net</text>
+   </g>
+   <g id="text_38">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="561.26663" y="89.177452" transform="rotate(-0 561.26663 89.177452)">DnCNN</text>
+   </g>
+   <g id="text_39">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="444.226299" y="65.113634" transform="rotate(-0 444.226299 65.113634)">FFDNet blind</text>
+   </g>
+   <g id="text_40">
+    <text style="font-size: 9.3px; font-family: 'Poppins'; text-anchor: start; fill: #27251f" x="444.726907" y="36.751434" transform="rotate(-0 444.726907 36.751434)">FFDNet oracle</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p967577f6a9">
+   <rect x="55.14" y="11.34" width="259.23" height="192.42"/>
+  </clipPath>
+  <clipPath id="pa28c0babda">
+   <rect x="377.43" y="11.34" width="259.23" height="192.42"/>
+  </clipPath>
+ </defs>
+</svg>

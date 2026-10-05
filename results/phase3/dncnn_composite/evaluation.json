@@ -1,0 +1,13 @@
+{
+  "method": "dncnn_composite",
+  "steps": 200000,
+  "images": 100,
+  "psnr": 27.83085865020752,
+  "ssim": 0.7795056062936783,
+  "lpips": 0.3241562623530626,
+  "gflops": 73.433874432,
+  "params": 558403,
+  "notes": "phase3-div2k-composite",
+  "protocol": "tiled-256-overlap32",
+  "source": "/kaggle/working/ckpt/ckpt_0200000.pt"
+}

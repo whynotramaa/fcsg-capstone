@@ -1,6 +1,5 @@
 data/
 checkpoints/
-results/figures/
 *.zip
 __pycache__/
 *.py[cod]
@@ -9,4 +8,4 @@ __pycache__/
 kaggle.json
 .kaggle/
 results/*.html
-results/.pdf
+build/

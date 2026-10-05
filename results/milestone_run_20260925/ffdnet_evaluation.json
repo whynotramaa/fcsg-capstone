@@ -1,0 +1,13 @@
+{
+  "method": "ffdnet",
+  "steps": 0,
+  "images": 68,
+  "psnr": 31.21981247733621,
+  "params": 852108,
+  "notes": "phase1-cbsd68-author-pretrained-unclipped",
+  "protocol": "author-cbsd68",
+  "source": "/kaggle/working/fcsg-milestones-20260925-195516/ffdnet_color.pth",
+  "target": 31.21,
+  "gap": 0.009812477336208048,
+  "passed": true
+}

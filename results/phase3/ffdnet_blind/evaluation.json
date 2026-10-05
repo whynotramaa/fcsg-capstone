@@ -1,0 +1,13 @@
+{
+  "method": "ffdnet_blind",
+  "steps": 200000,
+  "images": 100,
+  "psnr": 28.189946727752684,
+  "ssim": 0.7898506388068199,
+  "lpips": 0.31756939336657525,
+  "gflops": 27.88687872,
+  "params": 852108,
+  "notes": "phase3-div2k-composite",
+  "protocol": "tiled-256-overlap32",
+  "source": "/kaggle/working/ckpt/ckpt_0200000.pt"
+}

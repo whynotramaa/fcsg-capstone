@@ -39,8 +39,8 @@ with interpretable gates under 5M parameters, and the routing maps are the
 result, not a side effect. `plan.md` section 0.1 explains why the claim had to
 be narrowed and which papers force the narrowing.
 
-The model and composite pipeline are now implemented. Their runtime gates are
-pending the user-run milestone notebook; see `results/milestone_status.md`.
+The model and composite pipeline are implemented, and their Phase 2 gates
+passed on Kaggle on 2026-09-23; see `results/milestone_status.md`.
 The original machinery was built against DnCNN first on purpose. DnCNN has a published number, so if the training
 loop, the degradation, the metric, or the evaluation has a bug, DnCNN misses its
 number and you know the bug is in the training and evaluation code rather than
@@ -250,8 +250,7 @@ implement soft Fourier bands, shared separable experts, spatial top-2 mixing,
 SE fusion, and residual refinement. `src/fcsg_net/degrade.py` provides composite
 samples and a reproducible 5,000-pair export.
 
-The trained DnCNN remains the only measured result in this checkout. Run
-`notebooks/phase1_phase2.ipynb` to produce FFDNet and Phase 2 evidence. The
+`notebooks/phase1_phase2.ipynb` produced the FFDNet and Phase 2 evidence. The
 notebook uses pretrained FFDNet weights for inference reproduction, records
 actual GPU memory and compute, and stops on failed checks. A T4 result is not
 an RTX 3050 measurement. `results/milestone_status.md` records these limits.
@@ -261,8 +260,10 @@ separable convolutions to meet the compute budget. Every expert executes;
 top-2 mixing alone does not reduce computation. FFT cutoffs use cycles per
 pixel, but inference tiles still change boundaries and context.
 
-Phase 3 still needs frequency and entropy loss terms, matched training of all
-three models, SSIM, and LPIPS. Phase 4 still needs ablations and routing figures.
+Phase 3's frequency and entropy losses, matched 200,000-step training, SSIM,
+and LPIPS are complete. All four runs passed the comparison-table exit test.
+See `results/milestone_status.md` for scores and the next experiments.
+Phase 4 still needs ablations and routing figures.
 The literature review is now in `notes/related.md`.
 
 ## Rough edges
@@ -270,23 +271,7 @@ The literature review is now in `notes/related.md`.
 Real inconsistencies in the repository, listed so you do not spend an afternoon
 rediscovering one.
 
-- **`results/figures/` is in `.gitignore`, and `README.md` tells you to commit
-  the figures.** Pick one. Since the figures are the evidence a run happened,
-  the gitignore line is probably the mistake.
-- **`pyproject.toml` requires Python 3.14 and `README.md` says write for 3.11.**
-  The README is right about the target, because 3.11 is what Kaggle and Colab
-  run. The local environment being three versions ahead means syntax that works
-  on the laptop can fail on Kaggle, and you would find out after the clone cell
-  in a session you are paying GPU-hours for.
-- **`configs/dncnn.toml` asks for 300,000 steps.** At the rate the last session
-  measured, that is around ten sessions and three weeks of quota for a baseline
-  whose only job is to hit 29 dB, which DnCNN reaches long before then. Check
-  where `psnr_out` flattens in `train_log.csv` and cut `steps` to match. Change
-  it between sessions, never during one, because the learning rate schedule
-  depends on it.
-- **`eval.py` calls `resolve_div2k(args.data, args.val_dir, args.val_dir)`,
-  passing the validation directory in the training slot.** It works, since the
-  first return value is discarded, but it reads like a bug and will look like
-  one to whoever touches it next.
-- **`src/fcsg_net/__init__.py` still contains the `main` function from the
-  project template.** It prints `Hello from fcsg-net!` and nothing calls it.
+- **`configs/dncnn.toml`, `ffdnet.toml` still ask for 300,000 steps.** They are
+  the Phase 1 Gaussian configs and are not used in Phase 3. The composite
+  configs use 200,000 steps, set from the measured throughput in
+  `results/milestone_run_20260925/throughput.json`.

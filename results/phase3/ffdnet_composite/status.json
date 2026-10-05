@@ -1,0 +1,19 @@
+{
+  "config": "ffdnet_composite",
+  "step": 200000,
+  "steps": 200000,
+  "finished": true,
+  "evaluation": {
+    "method": "ffdnet_composite",
+    "steps": 200000,
+    "images": 100,
+    "psnr": 28.239542922973634,
+    "ssim": 0.7920011258125306,
+    "lpips": 0.31615204822272064,
+    "gflops": 27.88687872,
+    "params": 852108,
+    "notes": "phase3-div2k-composite",
+    "protocol": "tiled-256-overlap32",
+    "source": "/kaggle/working/ckpt/ckpt_0200000.pt"
+  }
+}

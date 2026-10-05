@@ -1,0 +1,27 @@
+{
+  "bundle_sha256": "d473bc10b0ad0c1ed50bd7b885c3b81fe85c4dbde9d5e61f139dd24cae019102",
+  "files": [
+    "src/fcsg_net/__init__.py",
+    "src/fcsg_net/data.py",
+    "src/fcsg_net/degrade.py",
+    "src/fcsg_net/metrics.py",
+    "src/fcsg_net/utils.py",
+    "models/blocks.py",
+    "models/dncnn.py",
+    "models/fcsg.py",
+    "models/ffdnet.py",
+    "training/build_tiles.py",
+    "training/train.py",
+    "evaluation/checks.py",
+    "evaluation/diagnose_phase3.py",
+    "evaluation/eval.py",
+    "evaluation/plots.py",
+    "evaluation/run_milestones.py",
+    "configs/dncnn.toml",
+    "configs/dncnn_composite.toml",
+    "configs/fcsg.toml",
+    "configs/ffdnet.toml",
+    "configs/ffdnet_blind.toml",
+    "configs/ffdnet_composite.toml"
+  ]
+}
