@@ -10,8 +10,8 @@ training of FCSG-Net, DnCNN and two FFDNet variants) plus the routing
 diagnostics run on the Phase 3 checkpoints. The Phase 4 routing ablation is
 left out and appears only as future work.
 
-Still to fill in `FrontPages.tex`: student names and roll numbers, and the
-supervisor's name. Those are the only red `[TODO]` marks left in the PDF.
+Authors (ascending roll number): Akshat Mittal (123CS0954), Risav Rathi
+(123CS0957), Ramnath Thakur (123CS0965). Supervisor: Dr. Shyampada Mukherjee.
 
 Build:
 

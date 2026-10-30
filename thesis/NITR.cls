@@ -34,6 +34,8 @@
 \newcommand{\degree}[1]{\renewcommand{\@degree}{#1}}
 \newcommand{\dept}[1]{\renewcommand{\@dept}{#1}}
 \newcommand{\authors}[1]{\renewcommand{\@authors}{#1}}
+\newcommand{\@authorsinline}{\@authors}
+\newcommand{\authorsInline}[1]{\renewcommand{\@authorsinline}{#1}}
 \newcommand{\supervisorOne}[1]{\renewcommand{\@supervisorone}{#1}}
 \newcommand{\supervisorTwo}[1]{\renewcommand{\@supervisortwo}{#1}}
 \newcommand{\submitDate}[1]{\renewcommand{\@submitdate}{#1}}
@@ -97,29 +99,29 @@
 \newcommand{\certificateOfExamination}{%
 	\@frontchapter{Certificate of Examination}
 	This is to certify that the work in the \@doctype{} entitled
-	\emph{\@reporttitle} by \@authors{} has been examined and is accepted
+	\emph{\@reporttitle} by \@authorsinline{} has been examined and is accepted
 	in partial fulfillment of the requirements for the degree of \@degree{}
 	in \@dept.
 	\vspace{1.2in}\par\noindent
 	\@signline{Supervisor}\hfill\@signline{Examiner}
 	\cleardoublepage}
 
-\newcommand{\@certbody}{%
+\newcommand{\@certbody}[1]{%
 	This is to certify that the work presented in this \@doctype{} entitled
-	\emph{\@reporttitle} by \@authors{} is a record of original research
-	carried out under our supervision and guidance in partial fulfillment of
+	\emph{\@reporttitle} by \@authorsinline{} is a record of original research
+	carried out under #1 supervision and guidance in partial fulfillment of
 	the requirements for the degree of \@degree{} in \@dept. Neither this
 	\@doctype{} nor any part of it has been submitted for any degree or
 	diploma elsewhere.}
 
 \newcommand{\certificateOneSupervisor}{%
 	\@frontchapter{Supervisor's Certificate}
-	\@certbody\vspace{1.2in}\par\noindent\hfill\@signline{\@supervisorone}
+	\@certbody{my}\vspace{1.2in}\par\noindent\hfill\@signline{\@supervisorone}
 	\cleardoublepage}
 
 \newcommand{\certificateTwoSupervisors}{%
 	\@frontchapter{Supervisors' Certificate}
-	\@certbody\vspace{1.2in}\par\noindent
+	\@certbody{our}\vspace{1.2in}\par\noindent
 	\@signline{\@supervisorone}\hfill\@signline{\@supervisortwo}
 	\cleardoublepage}
 
