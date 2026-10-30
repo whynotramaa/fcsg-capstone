@@ -32,7 +32,7 @@
 	\label{tab:hparams}
 	\todo{fill from configs/*.toml}
 \end{table}
-\todo{write; reuse schedules.pdf for lr and lambda_ent schedule}
+\todo{write; reuse schedules.pdf for learning-rate and entropy-weight schedules}
 
 \section{Evaluation Protocol}\label{sec:evalproto}
 % Final metrics: all 100 DIV2K valid images, tiled 256 with 32 px overlap,
@@ -47,6 +47,7 @@
 \begin{table}[htbp]
 	\centering
 	\caption{Pre-training verification gates (Kaggle T4).}
+	\small
 	\label{tab:gates}
 	\evidence{results/milestone_status.md}
 	\begin{tabular}{@{}lll@{}}
