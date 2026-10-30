@@ -1,19 +1,18 @@
-\chapter{Proposed Method: \fcsg}\label{ch:method}
+\chapter{Proposed method: \fcsg}\label{ch:method}
 
-This chapter describes the synthetic degradation used for training and
-evaluation, and then the network itself, one module at a time. The notation
-follows the implementation in \texttt{models/fcsg.py} and
-\texttt{models/blocks.py}.
+We first describe the synthetic degradation used for training and
+evaluation, then walk through the network one module at a time. The notation
+matches the code in \texttt{models/fcsg.py} and \texttt{models/blocks.py}.
 
-\section{Degradation Model}\label{sec:degradation}
+\section{Degradation model}\label{sec:degradation}
 
-Archival photographs are degraded in a rough physical order: the lens softens
-the image, scanning or resizing loses resolution, the sensor or film adds
-noise, and lossy storage compresses whatever is left. Our synthetic pipeline
-applies the four operations in that order (Table~\ref{tab:degradation}).
+An archival photograph picks up damage in a rough physical order. The lens
+softens it, scanning or resizing loses resolution, the sensor or film adds
+noise, and lossy storage compresses what remains. Our pipeline applies four
+matching operations in the same order (Table~\ref{tab:degradation}).
 \begin{table}[htbp]
 	\centering
-	\caption{Composite degradation pipeline. Parameters are sampled independently for every image.}
+	\caption{Composite degradation pipeline. We sample the parameters independently for every image.}
 	\label{tab:degradation}
 	\begin{tabular}{@{}lll@{}}
 		\toprule
@@ -27,36 +26,36 @@ applies the four operations in that order (Table~\ref{tab:degradation}).
 	\end{tabular}
 \end{table}
 
-Blur uses Pillow's Gaussian filter. Resampling shrinks the image by $s$ with
-bicubic interpolation and enlarges it back to the original size, so input and
-output always have the same dimensions. Noise is additive white Gaussian noise
-in 8-bit units, clipped to the valid range. JPEG encoding uses Pillow with
-chroma subsampling disabled. The image is quantised to 8 bits before the
-Pillow blur and before JPEG encoding, as a real file would be.
+Pillow's Gaussian filter does the blur. Resampling shrinks the image by $s$
+with bicubic interpolation and then enlarges it back, so input and output
+always share a size. The noise is additive white Gaussian noise in 8-bit
+units, clipped to the valid range. Pillow encodes the JPEG with chroma
+subsampling turned off. Before the blur and again before JPEG encoding, we
+quantise the image to 8 bits, as a real file would be.
 
-Each sample carries its four sampled parameters alongside the degraded and
-clean images. The network never sees them. They are recorded so that, after
-training, we can ask whether the router responds to the degradation
-(Chapter~\ref{ch:routing}). With noise between 5 and 50 grey levels and JPEG
-quality as low as 30, the mean input PSNR on our validation set is
-20.99\dB{}.
+Each sample stores its four parameters next to the degraded and clean
+images. The network never sees them. We keep them so that after training we
+can ask whether the router reacts to the degradation
+(Chapter~\ref{ch:routing}). Noise runs from 5 to 50 grey levels and JPEG
+quality goes as low as 30, and the mean input PSNR on our validation set
+comes out at 20.99\dB{}.
 
-\section{Architecture Overview}\label{sec:arch}
+\section{Architecture overview}\label{sec:arch}
 
-Figure~\ref{fig:architecture} shows the data flow. The degraded image $x$ is
-split into a low, a mid and a high frequency band, each of which is an
-ordinary RGB image. Three shared experts with $7\times7$, $5\times5$ and
-$3\times3$ kernels process every band. A spatial gate assigns, at each pixel
-and for each band, a weight to every expert, keeping only the two largest.
-The weighted expert outputs form one restored image per band:
+Figure~\ref{fig:architecture} shows the data flow. The network splits the
+degraded image $x$ into a low, a mid and a high frequency band, and each band
+is an ordinary RGB image. Three shared experts with $7\times7$, $5\times5$
+and $3\times3$ kernels process every band. At each pixel and for each band, a
+spatial gate gives every expert a weight and keeps the two largest. The
+weighted expert outputs add up to one restored image per band:
 \begin{equation}
 	y_b(u,v) = \sum_{e\in\{7,5,3\}} w_{b,e}(u,v)\; E_e(x_b)(u,v),
 	\qquad b\in\{L,M,H\}.
 	\label{eq:mix}
 \end{equation}
-The three band outputs are concatenated into nine channels, reweighted by a
-squeeze-and-excitation block, projected back to RGB and refined. The network
-predicts a residual that is added to its input:
+The network concatenates the three band outputs into nine channels,
+reweights them with a squeeze-and-excitation block, projects them back to RGB
+and refines the result. It predicts a residual and adds it to the input:
 \begin{equation}
 	\hat{f} = x + \mathrm{Refine}\big(\mathrm{SEFusion}([\,y_L, y_M, y_H\,])\big).
 	\label{eq:out}
@@ -65,32 +64,32 @@ predicts a residual that is added to its input:
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{architecture.pdf}
-	\caption{\fcsg{} data flow. Expert parameters are shared across the three
-	bands; the band dimension is folded into the batch dimension before each
-	expert call.}
+	\caption{\fcsg{} data flow. The three bands share expert parameters. Before
+	each expert call, the band dimension is folded into the batch dimension.}
 	\label{fig:architecture}
 \end{figure}
 
-\section{Frequency Decomposition}\label{sec:freqdecomp}
+\section{Frequency decomposition}\label{sec:freqdecomp}
 
-The decomposition is done in the Fourier domain with fixed masks, but the
-result of each mask is returned to the spatial domain immediately. We made
-this choice early and deliberately. An earlier version of the proposal fed
-masked complex spectra straight into the convolutional experts. That has two
-problems. A convolution over a spectrum has no clean meaning, since
-multiplication in one domain corresponds to convolution in the other, so the
-argument that large kernels suit smooth structure no longer applies. And
-complex inputs either become two real channels, where phase is discontinuous
-and training becomes unstable, or require complex tensor support that many
+We split the image in the Fourier domain with fixed masks, then bring each
+masked band straight back to the spatial domain. We chose this early, and
+for a reason. An earlier draft of the proposal fed masked complex spectra
+directly into the convolutional experts, and that fails in two ways. A
+convolution over a spectrum has no clean meaning, because multiplication in
+one domain is convolution in the other. The argument that large kernels suit
+smooth structure stops making sense there. Complex inputs also cause
+trouble. Split into two real channels, the phase is discontinuous and
+training becomes unstable. Kept complex, they need tensor support that many
 PyTorch operations lack. Masking in frequency and filtering in space keeps
-the decomposition exact and lets every expert be a plain real-valued CNN.
+the split exact and lets every expert be a plain real-valued CNN.
 
 Let $X = \mathcal{F}(x)$ be the two-dimensional real FFT of the image with
 orthonormal scaling, and let $r = \sqrt{f_x^2 + f_y^2}$ be the radial
-frequency in cycles per pixel. Frequencies are built with \texttt{fftfreq}
-and \texttt{rfftfreq} in the unshifted order the FFT uses. Each axis reaches
-the Nyquist limit at $0.5$ cycles per pixel. A soft low-pass mask with cutoff
-$c$ and transition width $\Delta = 0.05$ is a raised cosine:
+frequency in cycles per pixel. We build the frequency grid with
+\texttt{fftfreq} and \texttt{rfftfreq} in the unshifted order the FFT uses.
+Each axis reaches the Nyquist limit at $0.5$ cycles per pixel. A soft
+low-pass mask with cutoff $c$ and transition width $\Delta = 0.05$ is a
+raised cosine:
 \begin{equation}
 	t_c(r) = \mathrm{clip}\!\left(\frac{r-c}{\Delta} + \tfrac12,\ 0,\ 1\right),
 	\qquad
@@ -106,73 +105,72 @@ With cutoffs $r_1 = 0.10$ and $r_2 = 0.25$, the three band masks are
 \end{equation}
 and each band image is $x_b = \mathcal{F}^{-1}(M_b \cdot X)$.
 
-Three properties matter. First, the masks sum to one at every frequency, and
-the FFT is linear, so $x_L + x_M + x_H = x$ exactly; no information is lost
-or invented by the split. We measured a maximum reconstruction error of
-$6.0\times10^{-7}$ in single precision. Second, the cutoffs are defined in
-cycles per pixel rather than in FFT bin indices. A bin index means a
-different physical frequency at $128\times128$ than at full resolution, so
-bin-based cutoffs would shift between training crops and test images. With
-normalised radii the same sinusoid falls in the same band at both sizes,
-which we verified at 128 and 256 pixels. Third, the transitions are smooth.
-A hard step in frequency produces ringing in space, and the network would
-spend capacity undoing artefacts of its own preprocessing.
+Three properties of this split matter. The first is exactness. The masks sum
+to one at every frequency and the FFT is linear, so $x_L + x_M + x_H = x$.
+The split loses nothing and adds nothing. In single precision we measured a
+maximum reconstruction error of $6.0\times10^{-7}$. The second is that the
+cutoffs are in cycles per pixel, not FFT bin indices. A given bin index means
+one physical frequency at $128\times128$ and another at full resolution, so
+cutoffs set in bins would drift between training crops and test images. With
+normalised radii, a sinusoid lands in the same band at both sizes. We checked
+this at 128 and 256 pixels. The third is that the transitions are smooth. A
+hard step in frequency causes ringing in space, and the network would waste
+capacity cleaning up after its own preprocessing.
 
-The FFT runs in single precision even during mixed-precision training,
-because half-precision CUDA FFTs only support power-of-two sizes.
+The FFT stays in single precision even under mixed-precision training,
+because half-precision CUDA FFTs only handle power-of-two sizes.
 Figure~\ref{fig:masks} plots the three masks.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.9\linewidth]{frequency_masks.pdf}
-	\caption{Raised-cosine band masks with cutoffs 0.10 and 0.25 cycles per
-	pixel and transition width 0.05. Right: the masks on a centred frequency
-	plane (the computation itself uses unshifted ordering).}
+	\caption{Raised-cosine band masks with cutoffs at 0.10 and 0.25 cycles per
+	pixel and a transition width of 0.05. Right, the masks drawn on a centred
+	frequency plane. The computation itself uses unshifted order.}
 	\label{fig:masks}
 \end{figure}
 
-\section{Shared Kernel-Size Experts}\label{sec:experts}
+\section{Shared kernel-size experts}\label{sec:experts}
 
-There are three experts, $E_7$, $E_5$ and $E_3$, identical except for their
-kernel size. Each one processes all three bands, so the parameters are shared
-across bands and the number of experts does not grow with the number of
-bands.
+The three experts, $E_7$, $E_5$ and $E_3$, differ only in kernel size. Each
+one processes all three bands. The bands therefore share parameters, and
+adding bands would not add experts.
 
-An expert first applies a lossless $2\times2$ pixel unshuffle
-\cite{shi2016espcn}, turning a three-channel image into twelve channels at
-half resolution, as FFDNet does. A $1\times1$ convolution expands these to 48
-channels, followed by ReLU. Four residual blocks follow. Each block contains
-two depthwise-separable stages \cite{chollet2017xception}: a $k\times k$
-depthwise convolution and a $1\times1$ pointwise convolution, with a ReLU
-after the first stage. A $1\times1$ tail maps back to twelve channels and is
-added to the unshuffled input, and a pixel shuffle restores the original
-resolution. Odd image sizes are padded by replication and cropped back.
+An expert starts with a lossless $2\times2$ pixel unshuffle
+\cite{shi2016espcn}, as in FFDNet. This turns a three-channel image into
+twelve channels at half resolution. A $1\times1$ convolution widens these to
+48 channels, followed by a ReLU. Next come four residual blocks. Each block
+has two depthwise-separable stages \cite{chollet2017xception}, each made of a
+$k\times k$ depthwise convolution and a $1\times1$ pointwise convolution, with
+a ReLU after the first stage. A $1\times1$ tail maps back to twelve channels
+and adds the unshuffled input. A pixel shuffle then restores full resolution.
+For odd image sizes the expert pads by replication and crops afterwards.
 
-Separable convolutions and half-resolution processing are what make the
-budget possible. The experts run nine times per image, once per band for each
-of three experts, and dense full-resolution convolutions at width 48 would
-exceed ten GFLOPs by a wide margin.
+The budget depends on two choices, separable convolutions and
+half-resolution processing. Each image goes through nine expert passes, one
+per band for each of three experts. Dense full-resolution convolutions at
+width 48 would blow well past ten GFLOPs.
 
-We refer to the experts only by kernel size. Labels such as ``texture
-expert'' or ``edge expert'' would be claims about what the experts learned,
-and we have no attribution experiment that supports them.
+We name the experts by kernel size and nothing else. Calling one a ``texture
+expert'' or an ``edge expert'' would be a claim about what it learned, and no
+attribution experiment of ours supports such a claim.
 
-\section{Spatial Top-2 Gate}\label{sec:gate}
+\section{Spatial top-2 gate}\label{sec:gate}
 
-A routing decision that is made once per image would amount to nine numbers
-computed from a handful of global statistics. That is closer to a lookup
-table than to a router, and it is likely to settle on a near-constant choice.
-The \fcsg{} gate instead decides per location, so that a smooth sky and a
-textured roof in the same photograph can be treated differently.
+A gate that decided once per image would output nine numbers from a few
+global statistics. That is closer to a lookup table than a router, and it
+would probably settle on a near-constant choice. The \fcsg{} gate decides per
+location instead, so a smooth sky and a textured roof in the same photograph
+can get different treatment.
 
-The gate stacks the three RGB bands into nine channels and computes, in
-non-overlapping $16\times16$ windows, the local mean and the local mean of
-squares of each channel. These eighteen statistics pass through a
-two-layer $1\times1$ network ($18\to24\to9$, ReLU in between) that outputs
-nine logits $a_{b,e}$, one per band and expert. The logits are divided by a
-temperature $\tau = 1$ and bilinearly upsampled to full resolution. At each
-pixel and for each band the two largest logits are kept and normalised with a
-softmax; the third expert gets zero weight:
+The gate stacks the three RGB bands into nine channels. In non-overlapping
+$16\times16$ windows it computes the local mean and the local mean of squares
+of every channel. A two-layer $1\times1$ network ($18\to24\to9$, with a ReLU
+between the layers) maps these eighteen statistics to nine logits $a_{b,e}$,
+one per band and expert. The gate divides the logits by a temperature
+$\tau = 1$ and upsamples them bilinearly to full resolution. At each pixel
+and for each band it keeps the two largest logits and normalises them with a
+softmax. The third expert gets a weight of zero:
 \begin{equation}
 	w_{b,e}(u,v) =
 	\begin{cases}
@@ -182,37 +180,38 @@ softmax; the third expert gets zero weight:
 	\end{cases}
 	\label{eq:topk}
 \end{equation}
-where $\mathcal{T}_b(u,v)$ is the set of the two highest-scoring experts.
-The gate also returns the dense softmax over all three experts, $p_{b,e}$,
-which is used by the entropy term of the loss. The whole gate has 681
-parameters. Figure~\ref{fig:gate} shows the expert and gate operations.
+where $\mathcal{T}_b(u,v)$ holds the two highest-scoring experts. The gate
+also returns $p_{b,e}$, the dense softmax over all three experts, which feeds
+the entropy term of the loss. The whole gate has 681 parameters.
+Figure~\ref{fig:gate} shows the expert and gate operations.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=0.9\linewidth]{expert_gate.pdf}
 	\caption{Expert and gate operations. Experts use pixel rearrangement and
-	depthwise-separable residual blocks; the gate pools band statistics in
+	depthwise-separable residual blocks. The gate pools band statistics in
 	$16\times16$ windows.}
 	\label{fig:gate}
 \end{figure}
 
-As noted in Section~\ref{sec:lit-moe}, every expert is evaluated before
-mixing. Expert outputs at locations with zero weight are computed and then
-multiplied by zero. Turning the sparse weights into saved computation would
-require tiled conditional dispatch, which we did not implement.
+As Section~\ref{sec:lit-moe} pointed out, every expert runs before mixing.
+Where an expert's weight is zero, the network still computes its output and
+then multiplies it by zero. Saving that work would take tiled conditional
+dispatch, which we did not build.
 
-\section{Fusion and Residual Refinement}\label{sec:fusion}
+\section{Fusion and residual refinement}\label{sec:fusion}
 
-The three weighted band outputs are concatenated into nine channels. A
-squeeze-and-excitation block \cite{hu2018se} pools them globally, passes them
-through a $9\to3\to9$ bottleneck with a sigmoid, and scales each channel. A
-$1\times1$ convolution projects the result to three channels. Three
-$3\times3$ convolutions ($3\to16\to16\to3$, ReLU between them) refine it, and
-the output is added to the degraded input as in Equation~\eqref{eq:out}.
-Predicting a residual rather than the image itself is the central lesson of
-DnCNN \cite{zhang2017dncnn}, and it lets the network start from the identity.
+The network concatenates the three weighted band outputs into nine channels.
+A squeeze-and-excitation block \cite{hu2018se} pools them globally, passes
+them through a $9\to3\to9$ bottleneck with a sigmoid, and scales each
+channel. A $1\times1$ convolution projects the result to three channels. Three
+$3\times3$ convolutions ($3\to16\to16\to3$, with ReLUs between them) refine
+it, and the output is added to the degraded input as in
+Equation~\eqref{eq:out}. Predicting a residual instead of the image is the
+main lesson of DnCNN \cite{zhang2017dncnn}. It also means the network starts
+out close to the identity.
 
-\section{Training Objective}\label{sec:loss}
+\section{Training objective}\label{sec:loss}
 
 The loss has three terms:
 \begin{equation}
@@ -222,43 +221,43 @@ The loss has three terms:
 	\label{eq:loss}
 \end{equation}
 
-The Charbonnier loss \cite{charbonnier1994} is a smooth variant of L1,
+The Charbonnier loss \cite{charbonnier1994} is a smooth form of L1,
 \begin{equation}
 	\mathcal{L}_\text{char} = \operatorname{mean}\sqrt{(\hat f - f)^2 + \varepsilon^2},
-	\qquad \varepsilon = 10^{-3},
+	\qquad \varepsilon = 10^{-3}.
 \end{equation}
-which behaves like L2 near zero and like L1 for large errors.
+Near zero it acts like L2, and for large errors it acts like L1.
 
 The frequency term is the mean absolute value of the orthonormal FFT of the
-prediction error, $\mathcal{L}_\text{freq} = \operatorname{mean}\lvert
-\mathcal{F}(\hat f - f)\rvert$. It weights errors at every frequency equally,
-which counteracts the tendency of pixel losses to favour the dominant low
-frequencies.
+error, $\mathcal{L}_\text{freq} = \operatorname{mean}\lvert
+\mathcal{F}(\hat f - f)\rvert$. It gives every frequency the same weight.
+Pixel losses tend to favour the dominant low frequencies, and this term
+pushes back against that.
 
 The entropy term is the negative dense routing entropy, summed over bands and
-averaged over the batch and pixels:
+averaged over the batch and over pixels:
 \begin{equation}
 	\mathcal{L}_\text{ent} = \sum_b \operatorname{mean}_{n,u,v}\sum_e p_{b,e}\log p_{b,e}.
 \end{equation}
-Minimising it maximises entropy, which keeps all three experts in use early
-in training so that none of them is starved of gradient. A constant entropy
-bonus would, however, push the router towards uniform weights forever, which
-is the opposite of what we want to observe. The coefficient therefore decays
-linearly, $\lambda_\text{ent}(t) = 0.01\,(1 - t/T)$, reaching zero at the
-last update $T$. Because the sign of this term is easy to flip by accident,
-the verification suite checks that it decreases as the weights approach
-uniform. DnCNN and FFDNet are trained with the same Charbonnier and
-frequency terms and no entropy term.
+Minimising this term maximises entropy. Early in training that keeps all
+three experts in use, so none of them goes short of gradient. A fixed entropy
+bonus, though, would keep pulling the router toward uniform weights for the
+whole run, which is the opposite of what we want to see. So the coefficient
+decays linearly, $\lambda_\text{ent}(t) = 0.01\,(1 - t/T)$, and hits zero at
+the last update $T$. The sign of this term is easy to get wrong, so the
+verification suite checks that it falls as the weights approach uniform.
+DnCNN and FFDNet train with the same Charbonnier and frequency terms and no
+entropy term.
 
-\section{Model Size and Complexity}\label{sec:size}
+\section{Model size and complexity}\label{sec:size}
 
-Table~\ref{tab:params} breaks down the 97,088 parameters. Almost all of them
-are in the three experts; the gate, fusion and refinement stages together
-account for under four thousand.
+Table~\ref{tab:params} breaks down the 97,088 parameters. The three experts
+hold nearly all of them. The gate, fusion and refinement stages together come
+to under four thousand.
 
 \begin{table}[htbp]
 	\centering
-	\caption{\fcsg{} parameter breakdown.}
+	\caption{\fcsg{} parameters by module.}
 	\label{tab:params}
 	\begin{tabular}{@{}lr@{}}
 		\toprule
@@ -276,11 +275,11 @@ account for under four thousand.
 	\end{tabular}
 \end{table}
 
-For compute we profile multiply-accumulate operations (MACs) with
-\texttt{thop}, count each MAC as two floating-point operations, and add an
-estimate of $12 \times 5N\log_2 N$ for the forward and inverse FFTs, with
-$N = 256^2$. Small elementwise operations are not counted. Under this
-convention a $256\times256$ forward pass costs 4.66 GMACs, or 9.39 GFLOPs
-including the FFT estimate, inside the 10 GFLOP limit. The same convention is
-applied to the baselines. As Chapter~\ref{ch:results} shows, this count turned
-out to be a poor predictor of actual running time.
+To count compute we profile multiply-accumulate operations (MACs) with
+\texttt{thop} and count each MAC as two floating-point operations. For the
+forward and inverse FFTs we add an estimate of $12 \times 5N\log_2 N$, with
+$N = 256^2$. We leave out small elementwise operations. By this count a
+$256\times256$ forward pass costs 4.66 GMACs, or 9.39 GFLOPs with the FFT
+estimate, which is inside the 10 GFLOP limit. The baselines are counted the
+same way. Chapter~\ref{ch:results} shows that this number turned out to
+predict running time badly.

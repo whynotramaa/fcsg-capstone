@@ -1,54 +1,56 @@
 \chapter{Introduction}\label{ch:intro}
 
-\section{Motivation and Problem}\label{sec:motivation}
+\section{Motivation and problem}\label{sec:motivation}
 
-Old photographs rarely suffer from a single corruption. A print scanned at
-modest resolution, stored as a compressed JPEG and taken through a soft lens
-on grainy film carries all of those defects at once, and each affects a
-different part of the spectrum. Blur removes high frequencies, resampling
-discards detail above a resolution limit, noise dominates wherever the signal
-is weak (in natural images, the high frequencies), and JPEG quantises the mid
+An old photograph is rarely damaged in just one way. A print shot through a
+soft lens on grainy film, scanned at low resolution and saved as a
+compressed JPEG carries all of those defects, and each one hits a different
+part of the spectrum. Blur removes high frequencies. Resampling throws away
+detail above a resolution limit. Noise dominates where the signal is weak,
+which in natural images means the high frequencies. JPEG quantises the mid
 and high frequencies of each $8\times8$ block. Most restoration networks
-treat the mixture as one problem, and the strongest of them, such as
+treat the mixture as a single problem, and the strongest of them, such as
 Restormer \cite{zamir2022restormer}, need tens of millions of parameters.
 
-This project asks whether a very small network can use that spectral
-structure explicitly: split the image into frequency bands, and let a learned
-gate choose, for every band and every pixel, between convolutional experts of
-different kernel sizes. We call the network \fcsg{}.
+We ask whether a very small network can use this spectral structure
+directly. It splits the image into frequency bands, and a learned gate
+chooses between convolutional experts of different kernel sizes for every
+band and every pixel. We call the network \fcsg{}.
 
-Formally, a clean RGB image $f\in[0,1]^{H\times W\times 3}$ is degraded as
-$x=\mathcal{D}(f;\theta)$ with $\theta=(\sigma_\text{blur}, s, \sigma_n, q)$:
-Gaussian blur, bicubic down- and up-sampling by $s$, Gaussian noise of
-standard deviation $\sigma_n$, and JPEG at quality $q$. The parameters are
-random per image and hidden from the model. We seek $\hat f=g_\phi(x)$ close
-to $f$ in PSNR, SSIM and LPIPS, with fewer than five million parameters and
-fewer than ten GFLOPs for a $256\times256$ input.
+Formally, we degrade a clean RGB image $f\in[0,1]^{H\times W\times 3}$ as
+$x=\mathcal{D}(f;\theta)$ with $\theta=(\sigma_\text{blur}, s, \sigma_n, q)$.
+$\mathcal{D}$ applies Gaussian blur, bicubic down- and up-sampling by $s$,
+Gaussian noise with standard deviation $\sigma_n$, and JPEG at quality $q$.
+We draw the parameters at random for each image and hide them from the
+model. We want $\hat f=g_\phi(x)$ close to $f$ in PSNR, SSIM and LPIPS, with
+fewer than five million parameters and fewer than ten GFLOPs for a
+$256\times256$ input.
 
-\section{Objectives and Contributions}\label{sec:objectives}
+\section{Objectives and contributions}\label{sec:objectives}
 
-We test the hypothesis that \emph{spatial top-2 routing over shared
-kernel-size experts, applied after a fixed frequency decomposition, yields a
-routing policy that varies with content and degradation and that the trained
-network relies on, within the budget.} The objectives are:
+We test one hypothesis. \emph{Apply a fixed frequency decomposition, then
+route each band per pixel to the top two of several shared kernel-size
+experts. The routing will change with content and degradation, and the
+trained network will depend on it, all within the budget.} The work has four
+objectives.
 \begin{enumerate}
-	\item[\textbf{O1}] build \fcsg{} and verify it before training;
-	\item[\textbf{O2}] establish trustworthy baselines by reproducing a
-	published FFDNet result;
-	\item[\textbf{O3}] compare \fcsg{}, DnCNN and two FFDNet variants trained
-	under one matched protocol, in quality, size and measured speed;
-	\item[\textbf{O4}] characterise the learned routing.
+	\item[\textbf{O1}] Build \fcsg{} and verify it before training.
+	\item[\textbf{O2}] Get trustworthy baselines by reproducing a published
+	FFDNet result.
+	\item[\textbf{O3}] Compare \fcsg{}, DnCNN and two FFDNet variants trained
+	under one matched protocol, in quality, size and measured speed.
+	\item[\textbf{O4}] Describe what the router learned.
 \end{enumerate}
 
-The contributions are a 97,088-parameter network with its verification
-suite, a matched composite-degradation benchmark, a routing analysis linking
-expert weights to the recorded degradation, and a plain account of the
-outcome: \fcsg{} is within 0.6\dB{} of DnCNN with 5.7 times fewer parameters,
-but it is not faster on a GPU. We make no state-of-the-art or novelty claim;
-frequency decomposition and expert routing are both established
-(Chapter~\ref{ch:literature}).
+We contribute a 97,088-parameter network with its verification suite, a
+matched composite-degradation benchmark, and a routing analysis that links
+expert weights to the recorded degradation. We also report the outcome as it
+is. \fcsg{} comes within 0.6\dB{} of DnCNN with 5.7 times fewer parameters,
+but it is not faster on a GPU. We claim neither state-of-the-art quality nor
+novelty, since frequency decomposition and expert routing both have a long
+history (Chapter~\ref{ch:literature}).
 
-Chapter~\ref{ch:literature} reviews related work, Chapter~\ref{ch:method}
-describes the method, Chapter~\ref{ch:setup} the experimental setup and
-verification, Chapter~\ref{ch:results} the results and routing analysis, and
-Chapter~\ref{ch:conclusion} concludes.
+Chapter~\ref{ch:literature} reviews related work and
+Chapter~\ref{ch:method} describes the method. Chapter~\ref{ch:setup} covers
+the experimental setup and verification. Chapter~\ref{ch:results} gives the
+results and the routing analysis, and Chapter~\ref{ch:conclusion} concludes.

@@ -1,21 +1,19 @@
-\chapter{Routing Analysis}\label{ch:routing}
+\chapter{Routing analysis}\label{ch:routing}
 
-Chapter~\ref{ch:results} asked how well \fcsg{} restores images. This chapter
-asks what its gate actually does. All measurements here use the final
-200,000-update checkpoint from Chapter~\ref{ch:results}. They were taken on
-ten fixed validation images (0801, 0812, \dots, 0900), each degraded with
-eight different random seeds, giving 80 samples. For each sample we take the
-$256\times256$ centre crop after degrading the whole image. The ten source
-images are the independent units; the eight seeds per image vary only the
-degradation.
+Chapter~\ref{ch:results} measured how well \fcsg{} restores images. Here we
+look at what its gate does. Every measurement uses the final 200,000-update
+checkpoint from Chapter~\ref{ch:results}. We took ten fixed validation images
+(0801, 0812, \dots, 0900) and degraded each with eight random seeds, for 80
+samples in all. From each sample we cut the $256\times256$ centre crop after
+degrading the whole image. The ten source images are the independent units.
+The eight seeds per image change only the degradation.
 
-\section{Training Dynamics of the Gate}\label{sec:routing-training}
+\section{How the gate trains}\label{sec:routing-training}
 
-The entropy term in the loss is meant to keep all three experts in use early
-on and then fade out so that the gate can commit. Figure~\ref{fig:entropy}
-shows the dense routing entropy during training, summed over the three bands.
-Its maximum possible value is $3\ln 3 = 3.296$ nats, reached when every
-expert gets equal probability everywhere.
+The entropy term should keep all three experts busy early in training, then
+fade so the gate can commit. Figure~\ref{fig:entropy} tracks the dense
+routing entropy during training, summed over the three bands. It peaks at
+$3\ln 3 = 3.296$ nats when every expert gets equal probability everywhere.
 
 \begin{figure}[htbp]
 	\centering
@@ -25,115 +23,113 @@ expert gets equal probability everywhere.
 	\label{fig:entropy}
 \end{figure}
 
-At the end of training the dense probabilities remain close to uniform. On
+When training ends, the dense probabilities are still close to uniform. On
 the diagnostic samples the mean dense entropy per band is 1.089, 1.096 and
-1.097 nats for the low, mid and high bands, against a maximum of
-$\ln 3 = 1.099$. The sparse top-2 weights are similarly close to an even
-split, at 0.684, 0.691 and 0.692 nats against $\ln 2 = 0.693$. Taken alone,
-these numbers would suggest that the gate learned almost nothing. The rest of
-this chapter shows why that conclusion would be wrong: small differences
-between logits still change \emph{which} two experts are selected, and the
-selection turns out to matter.
+1.097 nats for the low, mid and high bands, with a ceiling of
+$\ln 3 = 1.099$. The sparse top-2 weights are just as close to an even split,
+at 0.684, 0.691 and 0.692 nats against $\ln 2 = 0.693$. On their own, these
+numbers suggest the gate learned almost nothing. The rest of the chapter
+shows that reading is wrong. Small gaps between logits still decide
+\emph{which} two experts get picked, and that choice matters.
 
-\section{Spatial Routing Statistics}\label{sec:routing-stats}
+\section{Spatial routing statistics}\label{sec:routing-stats}
 
-Figure~\ref{fig:routing-summary} summarises the routing over the 80 samples.
-Because two experts are selected at each pixel, the selection fractions in
+Figure~\ref{fig:routing-summary} sums up the routing over the 80 samples.
+The gate picks two experts at every pixel, so the selection fractions in
 each band add up to two.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{routing_summary.pdf}
-	\caption{Mean sparse weight and selection fraction for each expert and band
+	\caption{Mean sparse weight and selection fraction per expert and band
 	over 80 samples.}
 	\label{fig:routing-summary}
 \end{figure}
 
-The clearest pattern is in the high band, where the $3\times3$ expert is
-selected at 99.98\% of pixels. The other slot is shared between the larger
-experts, which still carry substantial weight on average (about 0.26 for the
-$7\times7$ expert and 0.22 for the $5\times5$). The high band is therefore
-not handed entirely to the small kernel; rather, the small kernel is always
-present and one of the larger kernels is mixed in depending on the location.
-This agrees with the intuition behind the design, that fine-scale content is
-best handled with a small support, though the routing data alone cannot show
-that the $3\times3$ expert is doing anything specific to high frequencies.
+The high band shows the sharpest pattern. The gate picks the $3\times3$
+expert at 99.98\% of its pixels. The larger experts share the second slot and
+still carry a fair amount of weight on average, about 0.26 for the
+$7\times7$ expert and 0.22 for the $5\times5$. So the small kernel does not
+own the high band outright. It is always there, and the gate mixes in one of
+the larger kernels depending on location. This fits the idea behind the
+design, that fine detail wants a small support. The routing data alone,
+though, cannot show that the $3\times3$ expert does anything specific to high
+frequencies.
 
-Figure~\ref{fig:routing-map} shows the routing maps for one image. The maps
-follow image structure: selection changes along object boundaries and between
-smooth and textured regions. Because a top-2 choice switches abruptly when
-two logits exchange rank, smooth underlying probabilities can still produce
-sharp boundaries between selected pairs.
+Figure~\ref{fig:routing-map} gives the routing maps for one image. The maps
+follow the image's structure. Selection changes along object boundaries and
+between smooth and textured areas. A top-2 choice flips the moment two logits
+swap rank, so smooth probabilities underneath can still produce hard edges
+between selected pairs.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{routing_0834.pdf}
-	\caption{Expert weights for validation image 0834 (seed 33). Rows: low, mid
-	and high band. Columns: degraded crop and the weights of the $7\times7$,
-	$5\times5$ and $3\times3$ experts, on a common 0 to 1 scale.}
+	\caption{Expert weights for validation image 0834 (seed 33). Rows show the
+	low, mid and high band. Columns show the degraded crop and the weights of
+	the $7\times7$, $5\times5$ and $3\times3$ experts on a shared 0 to 1 scale.}
 	\label{fig:routing-map}
 \end{figure}
 
-These maps describe the gate's output. They do not establish what each
-expert contributes to a particular restored structure, which would require
-attribution experiments we did not run.
+These maps show what the gate outputs. They do not show what each expert
+contributes to a given restored structure. That would need attribution
+experiments, and we did not run any.
 
-\section{Routing Versus Degradation Parameters}\label{sec:routing-corr}
+\section{Routing and the degradation parameters}\label{sec:routing-corr}
 
-Because every sample records its degradation parameters, we can ask whether
-the routing responds to them. For each image we subtract its eight-sample
-mean from both the mean routing weights and the degradation parameters, so
-that the comparison is within images and not driven by differences in image
-content. We then compute Pearson correlations between the nine mean expert
+Every sample records its degradation parameters, so we can ask whether the
+routing reacts to them. For each image we subtract the eight-sample mean from
+both the mean routing weights and the degradation parameters. The comparison
+then happens within images, and differences in content between images do not
+drive it. We compute Pearson correlations between the nine mean expert
 weights and the four parameters.
 
-Several of these correlations are strong. The mean weight of the $3\times3$
-expert in the high band correlates at $r = +0.81$ with the noise level: the
-noisier the input, the more the gate leans on the small kernel for high
-frequencies. In the low band, the $5\times5$ expert's weight correlates at
-$+0.80$ with noise and the $7\times7$ expert's at $-0.73$, so with more noise
-the gate shifts low-band weight from the largest kernel to the medium one.
-The mid band follows the same direction, with the $3\times3$ weight at
-$+0.77$. The six strongest correlations are all with the noise level. The
-strongest with blur is $+0.42$ and with JPEG quality $-0.39$, so within this
-sample the gate responds mainly to noise.
-Figure~\ref{fig:corr} shows the full correlation matrix next to the
-intervention results of the next section.
+Several correlations are strong. In the high band, the mean weight of the
+$3\times3$ expert correlates at $r = +0.81$ with the noise level. The noisier
+the input, the more the gate relies on the small kernel for high frequencies.
+In the low band, the weight of the $5\times5$ expert correlates at $+0.80$
+with noise and that of the $7\times7$ expert at $-0.73$. More noise moves
+low-band weight from the largest kernel to the middle one. The mid band moves
+the same way, with the $3\times3$ weight at $+0.77$. All six of the strongest
+correlations involve noise. The strongest one with blur is $+0.42$ and the
+strongest with JPEG quality is $-0.39$. In this sample, the gate reacts
+mostly to noise. Figure~\ref{fig:corr} shows the full correlation matrix next
+to the intervention results of the next section.
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{correlations_interventions.pdf}
-	\caption{Left: within-image Pearson correlations between mean routing
-	weights and degradation parameters. Right: per-image PSNR change under the
+	\caption{Left, within-image Pearson correlations between mean routing
+	weights and degradation parameters. Right, per-image PSNR change under the
 	inference interventions of Table~\ref{tab:interventions}.}
 	\label{fig:corr}
 \end{figure}
 
-We treat these results as exploratory. There are 36 correlations computed on
-ten source images, without correction for multiple comparisons and without
-image-level confidence intervals. The four parameters also vary together in
-every sample, so a correlation with noise cannot be fully separated from the
-other corruptions. A controlled sweep that varies one parameter at a time
-would be needed to make a causal statement. What the data do show is that
-the gate's output is not constant: it moves with the degradation in a
-consistent direction across images.
+We treat these results as exploratory. We computed 36 correlations on ten
+source images, with no correction for multiple comparisons and no
+image-level confidence intervals. All four parameters also change together
+in every sample, so a correlation with noise cannot be cleanly pulled apart
+from the other corruptions. A causal claim would need a controlled sweep that
+moves one parameter at a time. What the data do show is that the gate's
+output is not constant. It moves with the degradation, in the same direction,
+across images.
 
-\section{Inference-Time Interventions}\label{sec:interventions}
+\section{Inference-time interventions}\label{sec:interventions}
 
-Correlation shows that the gate responds to its input. It does not show that
-the network needs that response. To test this we kept the trained weights
-fixed and replaced the gate's output at inference time in two ways:
+A correlation shows that the gate reacts to its input. It does not show that
+the network needs that reaction. To test that, we froze the trained weights
+and replaced the gate's output at inference in two ways.
 \begin{itemize}
-	\item \emph{Equal pair weights}: keep the two experts the gate selects at
+	\item \emph{Equal pair weights.} Keep the two experts the gate picks at
 	each pixel, but give each a weight of one half.
-	\item \emph{Uniform weights}: ignore the gate and give all three experts a
+	\item \emph{Uniform weights.} Ignore the gate and give all three experts a
 	weight of one third everywhere.
 \end{itemize}
-Table~\ref{tab:interventions} reports the change in PSNR on the ten images.
+Table~\ref{tab:interventions} gives the PSNR change on the ten images.
 
 \begin{table}[htbp]
 	\centering
-	\caption{PSNR change when the trained gate is overridden at inference (10 images).}
+	\caption{PSNR change when we override the trained gate at inference (10 images).}
 	\label{tab:interventions}
 	\begin{tabular}{@{}lrr@{}}
 		\toprule
@@ -145,44 +141,40 @@ Table~\ref{tab:interventions} reports the change in PSNR on the ten images.
 	\end{tabular}
 \end{table}
 
-The two interventions separate two parts of the gate's decision. Flattening
-the weights within the selected pair costs only 0.04\dB{} on average, so the
-exact mixing proportions matter little. Removing the selection itself costs
-0.37\dB{} on average and up to almost 1\dB{} on one image. The trained
-network therefore depends mainly on \emph{which} experts are combined at each
-pixel, and much less on how they are weighted. This also explains how the
-gate can matter while its entropy stays near the maximum: a near-uniform
-distribution over three experts still leaves one of them consistently
-excluded.
+The two interventions pull apart two halves of the gate's decision.
+Flattening the weights inside the chosen pair costs only 0.04\dB{} on
+average, so the exact mix hardly matters. Dropping the selection costs
+0.37\dB{} on average and close to 1\dB{} on one image. The trained network
+depends mainly on \emph{which} experts are combined at each pixel and much
+less on how they are weighted. This also explains how the gate can matter
+while its entropy sits near the maximum. A near-uniform distribution over
+three experts still leaves one of them consistently left out.
 
-A limitation of this test is that it measures dependence on the gate of
-\emph{this} trained network. Its experts and fusion stage were trained
-alongside the gate and adapted to its choices, so overriding the gate puts
-the model in a situation it never saw. The result shows that the gate is
-doing real work in the trained model. It does not show that a model trained
-from the start without a gate would be worse. Answering that requires a
-matched training ablation, which we list as future work
-(Section~\ref{sec:future}).
+The test has a limit. It measures how much \emph{this} trained network leans
+on its gate. The experts and fusion stage trained alongside the gate and
+adapted to its choices, so overriding the gate puts the model somewhere it
+has never been. The result shows that the gate does real work inside the
+trained model. It does not show that a model trained without a gate from the
+start would do worse. That question needs a matched training ablation, which
+we list as future work (Section~\ref{sec:future}).
 
 \section{Discussion}\label{sec:discussion}
 
-Putting Chapters~\ref{ch:results} and~\ref{ch:routing} together gives a
-mixed but coherent picture. The routing mechanism works in the sense we set
-out to test. The gate produces spatially varying maps, its choices track the
-noise level in a consistent direction, and the trained model loses up to a
-decibel when its choices are overridden. These are the behaviours the
-design was meant to produce.
+Read together, Chapters~\ref{ch:results} and~\ref{ch:routing} give a mixed
+but consistent result. The routing works in the sense we set out to test. The
+gate produces maps that vary across the image, its choices follow the noise
+level in a steady direction, and the trained model loses up to a decibel when
+we override them. The design was meant to produce exactly these behaviours.
 
-What the routing does not do is make the model competitive. With fewer than
-a hundred thousand parameters, \fcsg{} ends up 0.6 to 1.0\dB{} behind
-baselines that are six to nine times larger, and on a GPU it is not faster
-than any of them. The likely reason for the quality gap is simply capacity.
-Even the largest expert has under 40,000 parameters, and much of the
-network's width is spent on processing three bands that sum to the original
-image. Blind FFDNet, the strongest fair model, gets its advantage from a
-plain and dense architecture, not from extra information.
+The routing does not make the model competitive. With under a hundred
+thousand parameters, \fcsg{} finishes 0.6 to 1.0\dB{} behind baselines six to
+nine times its size, and on a GPU it is slower than all of them. We think
+the quality gap comes down to capacity. The largest expert has fewer than
+40,000 parameters, and the network spends much of its width processing three
+bands that add back up to the original image. Blind FFDNet, the strongest
+fair model, wins on a plain, dense architecture, not on extra information.
 
-A useful way to read the result is that frequency-band routing is a cheap way
-to make a small model's behaviour \emph{interpretable}: we can see where
-each kernel size is used and relate it to the degradation. Within the budget
-we chose, it is not by itself a way to make the model better or faster.
+Our reading is this. Frequency-band routing is a cheap way to make a small
+model's behaviour \emph{interpretable}. We can see where each kernel size is
+used and tie that to the degradation. Within our budget, it does not on its
+own make the model better or faster.

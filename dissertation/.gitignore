@@ -1,0 +1,12 @@
+*.aux
+*.log
+*.toc
+*.out
+*.bbl
+*.blg
+*.idx
+*.ilg
+*.ind
+*.synctex.gz
+*.pdf
+!Chap00/NITlogo.pdf

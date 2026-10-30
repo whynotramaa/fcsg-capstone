@@ -1,150 +1,148 @@
-\chapter{Background and Related Work}\label{ch:literature}
+\chapter{Background and related work}\label{ch:literature}
 
-This chapter places \fcsg{} among three lines of work: convolutional
-restoration networks, restoration in the frequency domain, and
-mixture-of-experts routing. Published scores from these papers come from
-different tasks, datasets and noise protocols. We quote them only as context.
-None of them appear in our result tables, which contain only models we
-trained and evaluated ourselves under one protocol.
+We place \fcsg{} against three bodies of work: convolutional restoration
+networks, restoration in the frequency domain, and mixture-of-experts
+routing. The papers below report scores on different tasks, datasets and
+noise protocols, so we quote them for context only. Our result tables hold
+only models we trained and evaluated ourselves under a single protocol.
 
-\section{Image Restoration with CNNs}\label{sec:lit-cnn}
+\section{Image restoration with CNNs}\label{sec:lit-cnn}
 
-\paragraph{DnCNN.} Zhang et al.\ \cite{zhang2017dncnn} showed that a plain
-stack of convolutions, batch normalisation and ReLU learns denoising far more
-easily when it predicts the noise residual rather than the clean image. The
-output is formed by subtracting the predicted residual from the input. Our RGB
-implementation has 17 layers of width 64 and 558,403 parameters. DnCNN has no
-explicit noise-level input and no notion of frequency bands, which makes it a
-clean reference for what a conventional network achieves on our data. The
-original paper also studies blind denoising and several restoration tasks, so
-it is not limited to one fixed noise level.
+\paragraph{DnCNN.} Zhang et al.\ \cite{zhang2017dncnn} found that a plain
+stack of convolution, batch normalisation and ReLU learns denoising much more
+easily when it predicts the noise residual instead of the clean image. The
+network subtracts its predicted residual from the input to form the output.
+Our RGB version has 17 layers of width 64 and 558,403 parameters. DnCNN takes
+no noise-level input and knows nothing about frequency bands, so it shows
+what a conventional network does on our data. The original paper also
+covers blind denoising and other restoration tasks, not just one fixed noise
+level.
 
-\paragraph{FFDNet.} FFDNet \cite{zhang2018ffdnet} takes two ideas further.
-It rearranges the input into four half-resolution sub-images before
-convolution, which cuts computation by a factor of about four, and it
-concatenates a noise-level map to those sub-images so that a single network
-can handle a range of noise strengths. The colour model has 12 layers of width
-96. The author's KAIR inference release \cite{kair} has 852,108 parameters,
-with batch normalisation folded into the convolutions. The paper reports
-31.21\dB{} on CBSD68 at $\sigma=25$ using unclipped Gaussian noise. FFDNet
-is our second baseline. Its noise map, however, only describes Gaussian noise
-and says nothing about blur or JPEG artefacts.
+\paragraph{FFDNet.} FFDNet \cite{zhang2018ffdnet} adds two ideas. It
+rearranges the input into four half-resolution sub-images before any
+convolution, which cuts computation by about four times. It also
+concatenates a noise-level map to those sub-images, so one network covers a
+range of noise strengths. The colour model has 12 layers of width 96. The
+author's KAIR inference release \cite{kair} folds batch normalisation into the
+convolutions and has 852,108 parameters. The paper reports 31.21\dB{} on
+CBSD68 at $\sigma=25$ with unclipped Gaussian noise. FFDNet is our second
+baseline. Its noise map describes Gaussian noise and nothing else. It carries
+no information about blur or JPEG artefacts.
 
-\paragraph{Larger restorers.} NAFNet \cite{chen2022nafnet} shows that
-carefully simplified blocks without conventional nonlinear activations can
-match far more complex designs, which is a reminder that architectural novelty
-alone is weak evidence of progress. Restormer \cite{zamir2022restormer}
-represents the heavy end: transposed channel attention and gated feed-forward
-blocks with about 26 million parameters in its deblurring configuration. Both
-sit outside our budget and serve as context rather than as competitors.
+\paragraph{Larger restorers.} NAFNet \cite{chen2022nafnet} matches far more
+complex designs with simplified blocks that drop conventional nonlinear
+activations. New architecture alone, in other words, says little about
+progress. Restormer \cite{zamir2022restormer} sits at the heavy end, with
+transposed channel attention, gated feed-forward blocks and about 26 million
+parameters in its deblurring setup. Both are far outside our budget. We cite
+them as context, not as competitors.
 
-\section{Frequency-Domain Restoration}\label{sec:lit-freq}
+\section{Frequency-domain restoration}\label{sec:lit-freq}
 
-\paragraph{MWCNN.} Liu et al.\ \cite{liu2018mwcnn} replace pooling and
-upsampling in a U-Net with discrete wavelet and inverse wavelet transforms.
-The transforms are fixed and add no parameters, so the convolutional backbone
-carries the model's capacity. Importantly, MWCNN processes subbands jointly
-and its ablations argue against handling each subband separately. That result
-motivates the cross-band fusion stage in \fcsg{}. MWCNN establishes that
-explicit frequency decomposition is useful for restoration. It does not route
-subbands to different kernel sizes.
+\paragraph{MWCNN.} Liu et al.\ \cite{liu2018mwcnn} swap the pooling and
+upsampling of a U-Net for discrete wavelet and inverse wavelet transforms.
+The transforms are fixed and have no parameters, so all learned capacity
+lives in the convolutional backbone. MWCNN processes the subbands together,
+and its ablations argue against treating each subband on its own. That
+finding is why \fcsg{} has a cross-band fusion stage. MWCNN shows that an
+explicit frequency split helps restoration. It does not send subbands to
+different kernel sizes.
 
-\paragraph{Fast Fourier Convolution.} FFC \cite{chi2020ffc} splits channels
-between a local convolutional branch and a global branch that operates in the
-Fourier domain, which gives every layer an image-wide receptive field. FFC is
-an operator, not a single restoration model, and its cost depends on the
-backbone it is inserted into. \fcsg{} differs in that it returns each masked
-band to the spatial domain before any learned processing.
+\paragraph{Fast Fourier Convolution.} FFC \cite{chi2020ffc} divides the
+channels between a local convolutional branch and a global branch that works
+in the Fourier domain. Every layer then has an image-wide receptive field.
+FFC is an operator, not a restoration model, and its cost depends on the
+backbone it goes into. \fcsg{} differs because it brings each masked band
+back to the spatial domain before any learned layer touches it.
 
-\paragraph{SFNet and FSNet.} The closest prior work is by Cui et al.
-SFNet \cite{cui2023sfnet} uses content-dependent local decomposition with
-channel attention to select frequency information, together with a module that
-pools globally and in windows to widen the receptive field cheaply. FSNet
-\cite{cui2024fsnet} extends the approach to six restoration tasks with
-multiple receptive-field scales in one U-shaped network. Both already perform
-local, adaptive frequency selection. The distinction we test is narrower:
-\fcsg{} uses \emph{fixed} radial masks and puts the learned, spatial decision
-in the choice among shared $7\times7$, $5\times5$ and $3\times3$ experts,
-which we can then compare with known degradation parameters. Fixed bands on
-their own cannot be claimed as an advance over SFNet or FSNet.
+\paragraph{SFNet and FSNet.} Cui et al.\ wrote the closest prior work.
+SFNet \cite{cui2023sfnet} selects frequency content with a content-dependent
+local decomposition and channel attention. A second module pools globally and
+in windows to widen the receptive field at low cost. FSNet \cite{cui2024fsnet}
+applies the idea to six restoration tasks, with several receptive-field
+scales in one U-shaped network. Both already pick frequencies locally and
+adaptively. What we test is narrower. \fcsg{} uses \emph{fixed} radial masks
+and makes its learned, spatial decision among shared $7\times7$, $5\times5$
+and $3\times3$ experts. That decision can then be compared with known
+degradation parameters. Fixed bands alone are not an advance over SFNet or
+FSNet, and we do not claim they are.
 
-\paragraph{FFTformer.} Kong et al.\ \cite{kong2023fftformer} compute
-attention-related operations in the frequency domain for deblurring, with
-16.6 million parameters in their GoPro model. Their use of local Fourier
-processing also shows that the transform's spatial context is part of the
-architecture, which is relevant to our tiled inference
+\paragraph{FFTformer.} Kong et al.\ \cite{kong2023fftformer} move
+attention-related operations into the frequency domain for deblurring. Their
+GoPro model has 16.6 million parameters. They process Fourier blocks locally,
+which shows that the spatial extent of the transform is a design choice in
+its own right. The same issue comes up with our tiled inference
 (Section~\ref{sec:latency}).
 
 \paragraph{Spectral bias.} Rahaman et al.\ \cite{rahaman2019spectral} show
-that ReLU networks tend to fit low-frequency components of a target function
-before high-frequency ones. This motivates looking at errors band by band, but
-it does not prove that a low band needs a large kernel or that separate
-experts will specialise. Those remain empirical questions.
+that ReLU networks fit the low-frequency parts of a target before the
+high-frequency parts. That is a reason to inspect errors band by band. It
+does not prove that a low band needs a large kernel, or that separate experts
+will specialise. We treat both as open questions for the experiments.
 
-\section{Mixture of Experts and Gating}\label{sec:lit-moe}
+\section{Mixture of experts and gating}\label{sec:lit-moe}
 
 Shazeer et al.\ \cite{shazeer2017moe} introduced the sparsely gated
-mixture-of-experts layer, in which a noisy top-$k$ gate selects a small subset
-of experts for each example and auxiliary importance and load penalties
-prevent the gate from collapsing onto a few experts. Those penalties balance
-usage across a batch. They are not the same as maximising the routing entropy
-of each example, which would push every location towards uniform weights and
-work against specialisation. Fedus et al.\ \cite{fedus2022switch} simplify
-routing to a single expert per token in the Switch Transformer and discuss
-capacity, load balancing and numerical stability at very large scale.
+mixture-of-experts layer. A noisy top-$k$ gate picks a few experts for each
+example. Extra importance and load penalties stop the gate from collapsing
+onto a few favourites. These penalties balance usage over a batch. Maximising
+the routing entropy of every example is a different thing, and it would push
+each location toward uniform weights, which works against specialisation.
+Fedus et al.\ \cite{fedus2022switch} cut routing to one expert per token in
+the Switch Transformer and discuss capacity, load balance and numerical
+stability at very large scale.
 
-Two points from this literature shape our design and our claims. First, the
-\fcsg{} gate is spatial: it produces a routing map over pixels rather than a
-single decision per image. Second, the efficiency argument for sparse experts
-depends on \emph{conditional computation}, that is, not running the experts
-that receive zero weight. Our implementation computes every expert output and
-then mixes them with sparse weights. The sparsity is therefore a property of
-the weights and of the analysis, not a source of speed, and we account for
-the full cost of all experts in every FLOP and latency figure.
+Two lessons from this work shape our design and limit our claims. First, the
+\fcsg{} gate is spatial. It outputs a routing map over pixels, not one
+decision per image. Second, the speed argument for sparse experts rests on
+\emph{conditional computation}, where experts with zero weight never run. Our
+code runs every expert and then mixes the outputs with sparse weights. The
+sparsity lives in the weights and in the analysis. It does not make anything
+faster, and every FLOP and latency figure we report includes all experts.
 
-The fusion stage uses a squeeze-and-excitation block \cite{hu2018se}, which
-pools features globally, compresses them through a small bottleneck and
-predicts per-channel scales. In \fcsg{} it reweights the nine band channels
-before projecting them back to RGB, at a cost of 96 parameters.
+The fusion stage uses a squeeze-and-excitation block \cite{hu2018se}. It pools
+features globally, squeezes them through a small bottleneck and predicts a
+scale for each channel. In \fcsg{} it reweights the nine band channels before
+the projection back to RGB, and it costs 96 parameters.
 
-\section{Evaluation Metrics}\label{sec:lit-metrics}
+\section{Evaluation metrics}\label{sec:lit-metrics}
 
-\paragraph{PSNR.} For an image with pixel values in $[0,1]$, the
-peak signal-to-noise ratio is
+\paragraph{PSNR.} For pixel values in $[0,1]$, the peak signal-to-noise
+ratio is
 \begin{equation}
 	\mathrm{PSNR}(\hat f, f) = 10\log_{10}\frac{1}{\mathrm{MSE}(\hat f, f)},
 	\qquad
 	\mathrm{MSE} = \frac{1}{3HW}\sum_{c,u,v}\big(\hat f_{c,u,v} - f_{c,u,v}\big)^2 .
 	\label{eq:psnr}
 \end{equation}
-We compute PSNR per image over all RGB channels and report the arithmetic mean
+We compute PSNR per image over all three RGB channels and report the mean
 over the dataset.
 
 \paragraph{SSIM.} The structural similarity index \cite{wang2004ssim}
-compares local means, variances and covariances within a sliding window. We
-use an $11\times11$ Gaussian window with $\sigma=1.5$, constants
-$C_1=0.01^2$ and $C_2=0.03^2$, and average over channels and positions.
+compares local means, variances and covariances inside a sliding window. We
+use an $11\times11$ Gaussian window with $\sigma=1.5$ and constants
+$C_1=0.01^2$ and $C_2=0.03^2$, then average over channels and positions.
 
-\paragraph{LPIPS.} LPIPS \cite{zhang2018lpips} measures the distance between
-normalised deep features of two images, with channel weights calibrated
-against human perceptual judgements. We use the AlexNet variant with inputs
-scaled to $[-1,1]$. Lower is better. LPIPS can disagree with PSNR because
-perceptual similarity and exact pixel agreement are different properties. The
-metric network is an evaluation tool and is not counted in any model's
-parameters.
+\paragraph{LPIPS.} LPIPS \cite{zhang2018lpips} is a distance between
+normalised deep features of two images. Its channel weights were fitted to
+human judgements of perceptual similarity. We use the AlexNet variant with
+inputs scaled to $[-1,1]$. Lower is better. LPIPS and PSNR can disagree,
+because looking similar and matching pixel for pixel are different things.
+The LPIPS network is only a measuring tool, and we do not count its
+parameters toward any model.
 
-\section{Research Gap}\label{sec:gap}
+\section{Research gap}\label{sec:gap}
 
-Table~\ref{tab:gap} summarises how \fcsg{} relates to the methods above.
-The combination it tests is fixed frequency bands, shared kernel-size experts,
-per-pixel top-2 routing and a budget below 0.1 million parameters. No single
-prior method we reviewed occupies exactly this point, but each ingredient is
-established, so the contribution of this project is an empirical study of the
-combination rather than a new building block.
+Table~\ref{tab:gap} sets \fcsg{} beside the methods above. It combines fixed
+frequency bands, shared experts that differ in kernel size, per-pixel top-2
+routing and a budget under 0.1 million parameters. None of the methods we
+reviewed sits at exactly this point. Each part, though, already exists. Our
+contribution is an empirical study of how the parts behave together, not a
+new building block.
 
 \begin{table}[htbp]
 	\centering
-	\caption{Positioning of \fcsg{} against closely related methods.}
+	\caption{How \fcsg{} compares with closely related methods.}
 	\small
 	\label{tab:gap}
 	\begin{tabular}{@{}lcccl@{}}

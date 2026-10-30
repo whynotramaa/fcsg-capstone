@@ -1,26 +1,26 @@
-\chapter{Experimental Setup}\label{ch:setup}
+\chapter{Experimental setup}\label{ch:setup}
 
-\section{Data, Baselines and Training}\label{sec:training}
+\section{Data, baselines and training}\label{sec:training}
 
-We use DIV2K \cite{agustsson2017div2k}: 800 training images and 100
-validation images, the latter used for every reported result. Training uses
-a cache of 32 fixed $128\times128$ crops per training image (25,600 tiles),
-with random flips and rotations, and applies the degradation on the fly, so
-every epoch sees new corruptions. A fixed set of 5,000 pairs (seed 1234) was
-also exported for reproducibility.
+We use DIV2K \cite{agustsson2017div2k}, with 800 training images and 100
+validation images. Every reported result comes from the validation images.
+Training reads from a cache of 32 fixed $128\times128$ crops per training
+image, 25,600 tiles in all, with random flips and rotations. The degradation
+runs on the fly, so each epoch sees new corruptions. For reproducibility we
+also exported a fixed set of 5,000 pairs generated with seed 1234.
 
 The baselines are an RGB DnCNN (17 layers, width 64, 558,403 parameters) and
-FFDNet in the author's colour configuration (852,108 parameters) in two
-variants. \emph{Oracle} FFDNet receives the true sampled noise level, which
-no real user would have, so it is an upper reference. \emph{Blind} FFDNet
-receives a constant map of $27.5/255$ and sees exactly what the other models
-see. All four models are trained from scratch with the same settings
-(Table~\ref{tab:hparams}). Each model was trained once with an unfixed seed,
-on a Tesla T4 in Kaggle sessions that resume from checkpoints.
+FFDNet in the author's colour configuration (852,108 parameters), in two
+variants. \emph{Oracle} FFDNet gets the true sampled noise level. No real
+user would have that, so it serves as an upper reference. \emph{Blind}
+FFDNet gets a constant map of $27.5/255$ and sees exactly what the other
+models see. We train all four from scratch with the same settings
+(Table~\ref{tab:hparams}). Each model trained once with an unfixed seed, on a
+Tesla T4 in Kaggle sessions that resume from checkpoints.
 
 \begin{table}[htbp]
 	\centering
-	\caption{Training configuration, identical for every method.}
+	\caption{Training configuration, the same for every method.}
 	\label{tab:hparams}
 	\small
 	\begin{tabular}{@{}ll@{}}
@@ -36,24 +36,26 @@ on a Tesla T4 in Kaggle sessions that resume from checkpoints.
 	\end{tabular}
 \end{table}
 
-\section{Evaluation Protocol}\label{sec:evalproto}
+\section{Evaluation protocol}\label{sec:evalproto}
 
-Each of the 100 validation images is degraded once with a seed equal to its
-index, so all models see identical inputs. Inference uses $256\times256$
-tiles with 32-pixel overlap, averaged where tiles overlap. Training-time
-validation on 16 fixed crops is used only for monitoring; it is not
-comparable with full-image results (30.59 against 27.24\dB{} for \fcsg{}).
+We degrade each of the 100 validation images once, with its index as the
+seed, so all models see identical inputs. Inference runs on $256\times256$
+tiles with 32 pixels of overlap, averaged where tiles meet. During training
+we monitored PSNR on 16 fixed crops. That number does not compare with
+full-image results. For \fcsg{} it is 30.59\dB{} on crops and 27.24\dB{} on
+full images.
 
-\section{Verification and Baseline Reproduction}\label{sec:verification}
+\section{Verification and baseline reproduction}\label{sec:verification}
 
 Before training, a notebook on the same T4 ran the checks in
-Table~\ref{tab:gates} and stopped at any failure. The overfit check is the
-most useful: a model that cannot memorise one image in 200 steps has a bug,
-and it is better to learn that in seconds than after ten hours of training.
+Table~\ref{tab:gates} and stopped at the first failure. The overfit check
+earns its place. If a model cannot memorise one image in 200 steps it has a
+bug, and finding that out in seconds beats finding it after ten hours of
+training.
 
 \begin{table}[htbp]
 	\centering
-	\caption{Pre-training verification checks.}
+	\caption{Checks run before training.}
 	\label{tab:gates}
 	\small
 	\begin{tabular}{@{}lll@{}}
@@ -70,9 +72,9 @@ and it is better to learn that in seconds than after ten hours of training.
 	\end{tabular}
 \end{table}
 
-To validate the FFDNet code against a published number we evaluated the
-author's pretrained colour weights \cite{kair} on the 68 CBSD68 images
-\cite{martin2001bsd} with the author's protocol, obtaining 31.220\dB{}
-against 31.21\dB{} in the paper, a difference of 0.01\dB{}. As an end-to-end
-check of the training loop, DnCNN trained on clipped Gaussian noise at
-$\sigma=25$ reached 32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.
+To check our FFDNet code against a published number, we ran the author's
+pretrained colour weights \cite{kair} on the 68 CBSD68 images
+\cite{martin2001bsd} with the author's protocol. We got 31.220\dB{} against
+31.21\dB{} in the paper, a gap of 0.01\dB{}. To test the training loop end to
+end, we trained DnCNN on clipped Gaussian noise at $\sigma=25$. It reached
+32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.

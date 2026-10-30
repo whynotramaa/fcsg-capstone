@@ -1,0 +1,57 @@
+\makeatletter
+\def\@indexColumns{3}
+\makeatother
+\documentclass[12pt,a4paper,oneside]{NITR}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage[hyphens]{url}
+\usepackage[font=small,skip=6pt]{caption}
+\captionsetup{singlelinecheck=false}
+\onehalfspacing
+\begin{document}
+\input{FrontPages}
+\coverPage
+\titlePage
+\certificateOfExamination
+% One supervisor is a working assumption; use the two-supervisor macro if needed.
+\certificateOneSupervisor
+\declaration
+% Optional: \dedication and \acknowledgment
+\abstract
+\begin{singlespace}
+\tableofcontents
+\cleardoublepage
+% Enable automatic figure/table lists only if required.
+\end{singlespace}
+\cleardoublepage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\textbf{Chapter \thechapter}}}
+\input{chapters/01-project-overview}
+\cleardoublepage
+\input{chapters/02-proposed-pipeline}
+\cleardoublepage
+\input{chapters/03-evaluation-and-status}
+\cleardoublepage
+\rhead{\textit{References}}
+\lhead{}
+\renewcommand\bibname{References}
+\bibliographystyle{Ref/IEEEtran}
+\begin{singlespace}
+\addcontentsline{toc}{chapter}{References}
+% Replace this template block with \bibliography{Ref/references} once cited entries exist.
+\chapter*{References}
+\textit{[Add verified bibliographic records for sources cited in the report. Use one consistent style. This page is intentionally a template, with no invented references.]}
+
+\medskip
+\noindent Sources to verify before writing:
+\begin{itemize}
+\item Original DnCNN and FFDNet papers for the comparison methods.
+\item Frequency-restoration papers used to motivate the pipeline.
+\item Expert-routing and squeeze-and-excitation papers for reused concepts.
+\item Dataset and metric papers for the evaluation protocol.
+\end{itemize}
+\end{singlespace}
+\cleardoublepage
+\end{document}

@@ -1,0 +1,38 @@
+\chapter{Proposed pipeline}
+\label{ch:pipeline}
+
+\section{Pipeline overview}
+\textit{[Insert one architecture diagram. Show the inference path, the input residual connection, and a separate training-only target and loss branch.]}
+
+\begin{figure}[ht]
+\centering
+\fbox{\parbox[c][35mm][c]{0.88\textwidth}{\centering
+[Pipeline diagram placeholder]\\[3mm]
+Show restoration stages, routing weights, input skip,\\
+and a separate training-only target and loss path.}}
+\caption{Proposed restoration pipeline. Replace this placeholder with the verified architecture diagram.}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Pipeline components}
+\textit{[Describe each component briefly. Cite the source of reused ideas.]}
+\begin{singlespace}
+\begin{table}[ht]
+\centering
+\caption{Pipeline component description template.}
+\begin{tabular}{p{0.28\textwidth}p{0.62\textwidth}}
+\toprule
+Component & Details to supply \\
+\midrule
+Input and degradation & Image range, degradation order, and sampled ranges. \\
+Frequency bands & Transform, complementary masks, and cutoffs. \\
+Shared experts & Kernel sizes, blocks, channels, and pixel rearrangement. \\
+Routing & Gate inputs, top-2 weights, and expert execution. \\
+Fusion and output & Channel fusion, refinement, and input residual. \\
+\bottomrule
+\end{tabular}
+\end{table}
+\end{singlespace}
+
+\section{Training objective}
+\textit{[State the reconstruction, frequency, and routing terms used by the implementation. Define symbols and coefficients. Keep this to one short explanation.]}

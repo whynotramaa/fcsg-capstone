@@ -1,107 +1,107 @@
-\chapter{Conclusion and Future Work}\label{ch:conclusion}
+\chapter{Conclusion and future work}\label{ch:conclusion}
 
-\section{Summary of Findings}\label{sec:summary}
+\section{Summary of findings}\label{sec:summary}
 
-We set out to test whether a very small restoration network could split an
-image into frequency bands and route each band, pixel by pixel, to
-convolutional experts of different kernel sizes, and whether the learned
-routing would be meaningful. We return to the four objectives of
+We asked two questions. Can a very small restoration network split an image
+into frequency bands and route each band, pixel by pixel, to convolutional
+experts with different kernel sizes? And does the learned routing mean
+anything? Here we go back over the four objectives of
 Section~\ref{sec:objectives}.
 
 \paragraph{O1, build and verify.} \fcsg{} has 97,088 parameters and costs
-9.39 reported GFLOPs at $256\times256$, well inside the limits of five million
-and ten. It passed every verification check before training: exact band
-reconstruction, consistent frequency units across image sizes, gradient flow,
-mixed-precision execution, single-image overfitting and exact checkpoint
-restoration (Section~\ref{sec:verification}).
+9.39 reported GFLOPs at $256\times256$, far inside the limits of five million
+and ten. Before training it passed every check. Bands reconstruct exactly,
+frequency units hold across image sizes, gradients flow, mixed precision runs
+cleanly, the model overfits a single image, and checkpoints restore exactly
+(Section~\ref{sec:verification}).
 
-\paragraph{O2, trustworthy baselines.} Our FFDNet implementation reproduces
-the published CBSD68 result to within 0.01\dB{} using the author's weights,
-and our DnCNN training loop reaches 32.65\dB{} on DIV2K for Gaussian
-denoising (Section~\ref{sec:baseline-repro}).
+\paragraph{O2, trustworthy baselines.} With the author's weights, our FFDNet
+code matches the published CBSD68 result to within 0.01\dB{}. Our DnCNN
+training loop reaches 32.65\dB{} on DIV2K for Gaussian denoising
+(Section~\ref{sec:baseline-repro}).
 
 \paragraph{O3, matched comparison.} Under one composite degradation and one
 training protocol, \fcsg{} reaches 27.24\dB{} PSNR, 0.753 SSIM and 0.396
-LPIPS on 100 DIV2K validation images. This is 0.59\dB{} below DnCNN and
-0.95\dB{} below blind FFDNet, and it loses to FFDNet on every one of the 100
-images. It does so with 82.6\% fewer parameters than DnCNN and 88.6\% fewer
-than FFDNet. Its low FLOP count, however, did not make it fast: on a Tesla T4
-it is the slowest of the four models (Chapter~\ref{ch:results}).
+LPIPS on 100 DIV2K validation images. That puts it 0.59\dB{} below DnCNN and
+0.95\dB{} below blind FFDNet, and FFDNet beats it on all 100 images. It gets
+there with 82.6\% fewer parameters than DnCNN and 88.6\% fewer than FFDNet.
+Its low FLOP count did not make it fast. On a Tesla T4 it is the slowest of
+the four (Chapter~\ref{ch:results}).
 
-\paragraph{O4, the routing.} The learned gate varies across the image,
-selects the $3\times3$ expert almost everywhere in the high band, and shifts
-its weights with the noise level, with within-image correlations up to
-$r=+0.81$. Overriding its selections at inference costs 0.37\dB{} on average,
-while flattening its weights within the selected pair costs only 0.04\dB{},
-so the trained model depends on which experts are chosen more than on how
-they are mixed (Chapter~\ref{ch:routing}).
+\paragraph{O4, the routing.} The learned gate varies across the image. It
+picks the $3\times3$ expert almost everywhere in the high band and shifts its
+weights with the noise level, with within-image correlations up to
+$r=+0.81$. Overriding its choices at inference costs 0.37\dB{} on average.
+Flattening its weights inside the chosen pair costs only 0.04\dB{}. The
+trained model cares more about which experts are picked than about how they
+are mixed (Chapter~\ref{ch:routing}).
 
-In short, frequency-band routing produced a small model whose behaviour can
-be inspected and related to the degradation, but within our budget it did
-not produce a model that is better or faster than simple convolutional
-baselines.
+Put briefly, frequency-band routing gave us a small model whose behaviour we
+can inspect and relate to the degradation. Within our budget it did not give
+us a model that beats simple convolutional baselines on quality or speed.
 
 \section{Limitations}\label{sec:limitations}
 
-Several limitations bound how far these results can be taken.
+These results only go so far, for the following reasons.
 
-Each model was trained once with an unfixed seed, so we have no estimate of
-run-to-run variance. The consistency of the gap across images makes it
-unlikely to be an accident of one seed, but small differences, such as
-between the two FFDNet variants, cannot be interpreted. All results are on
-the DIV2K validation split, which was also used to monitor training; there is
-no untouched test set.
+We trained each model once without fixing the seed, so we have no estimate
+of run-to-run variance. The gap holds across images, which makes a lucky
+seed an unlikely explanation. Small differences, such as the one between the
+two FFDNet variants, cannot be interpreted. All results come from the DIV2K
+validation split, which we also used to monitor training. No test set was
+left untouched.
 
-The degradation is synthetic. Real archival photographs suffer from fading,
-scratches, dust, colour casts and scanner artefacts that our pipeline does
-not model, and we did not evaluate on real archival images or ask people to
-judge the results. The good performance of any of these models on our data
-says nothing yet about real archives.
+The degradation is synthetic. Real archival photographs fade, scratch,
+collect dust, pick up colour casts and carry scanner artefacts, and our
+pipeline models none of these. We did not test on real archival images, and
+no person rated the outputs. How any of these models handles our data tells
+us nothing yet about real archives.
 
-The routing analysis uses ten source images. Its correlations are
-exploratory, the four degradation parameters vary together, and there is no
-correction for the number of comparisons. The inference interventions
-measure the trained model's dependence on its gate, not the value of having a
-gate during training.
+The routing analysis rests on ten source images. Its correlations are
+exploratory. The four degradation parameters move together, and we applied
+no correction for the number of comparisons. The inference interventions
+measure how much the trained model leans on its gate. They do not measure
+what a gate adds during training.
 
-The cost measurements cover one GPU, the Tesla T4, at batch size 1 in FP32.
-We did not profile individual operators, so our explanation of why \fcsg{} is
-slow is a reasoned account rather than a measurement. We did not measure
-latency on CPUs or mobile hardware, nor peak training memory at batch 16.
+The cost figures come from one GPU, the Tesla T4, at batch size 1 in FP32.
+We did not profile individual operators, so our account of why \fcsg{} is
+slow is reasoning, not measurement. We did not measure latency on CPUs or
+mobile hardware, or peak training memory at batch 16.
 
-Finally, \fcsg{} computes all nine expert passes regardless of the gate, so
-its sparse routing does not save computation.
+Last, \fcsg{} runs all nine expert passes whatever the gate decides, so its
+sparse routing saves no computation.
 
-\section{Future Work}\label{sec:future}
+\section{Future work}\label{sec:future}
 
-The most important next step is a matched training ablation: train \fcsg{}
-and an otherwise identical model with fixed uniform weights from the same
-initialisation and seed, and compare them on the full validation set,
-preferably with several seeds each. This is the only experiment that can
-show whether learning a router helps, rather than whether a trained model
-depends on its router. Related ablations would replace the three kernel sizes
-with three identical $3\times3$ experts, replace the spatial gate with a
-single per-image gate, replace SE fusion with plain concatenation, and
-replace the soft masks with hard ones. Each of these isolates one design
-decision of Chapter~\ref{ch:method}.
+The first experiment to run is a matched training ablation. Train \fcsg{} and
+an identical model with fixed uniform weights, from the same initialisation
+and seed, and compare them on the full validation set, ideally with several
+seeds each. Only this experiment can show whether learning a router helps, as
+opposed to whether a trained model leans on the router it has. Four related
+ablations would each test one design choice from Chapter~\ref{ch:method}:
+\begin{itemize}
+	\item three identical $3\times3$ experts in place of three kernel sizes,
+	\item a single per-image gate in place of the spatial gate,
+	\item plain concatenation in place of SE fusion, and
+	\item hard masks in place of soft ones.
+\end{itemize}
 
-The second direction is to turn sparse weights into sparse computation. Since
-the trained model mostly cares about which two experts are chosen, skipping
-the third expert in tiles where it is never selected could reduce the
-running cost by up to a third. This should be preceded by an operator-level
-profile, because if latency is dominated by memory traffic and launch
-overhead, removing arithmetic may not help much. Measuring latency on a CPU
-and on a mobile accelerator would show whether the model's low FLOP count
-is worth more on hardware that suits depthwise convolutions.
+Second, sparse weights could become sparse computation. The trained model
+cares mostly about which two experts are picked. Skipping the third expert in
+tiles where the gate never selects it could cut running cost by up to a
+third. An operator-level profile should come first. If memory traffic and
+launch overhead dominate latency, removing arithmetic may not help much. Timing
+the model on a CPU and on a mobile accelerator would show whether its low
+FLOP count pays off on hardware that handles depthwise convolutions well.
 
-Third, the capacity gap could be addressed directly by widening the experts
-within the parameter budget, which is about fifty times larger than what the
-model uses. The compute budget is nearly exhausted, so this would have to go
-together with cheaper expert evaluation, for example by sharing one
-unshuffled feature map across bands. Letting the gate see a larger context than a $16\times16$
-window may also help.
+Third, the capacity gap could be attacked head on by widening the experts.
+The parameter budget is about fifty times what the model uses now. The
+compute budget is nearly spent, though, so wider experts would need cheaper
+expert evaluation to go with them, for example one unshuffled feature map
+shared across bands. Giving the gate more context than a $16\times16$ window
+may also help.
 
-Finally, any claim about archival restoration needs real archival
-photographs, a controlled degradation sweep to separate the effect of each
-corruption on the routing, and a held-out test set that was never used
-during development.
+Finally, any claim about archival restoration needs three more things. These
+are real archival photographs, a controlled sweep that separates the effect
+of each corruption on the routing, and a held-out test set that was never
+touched during development.

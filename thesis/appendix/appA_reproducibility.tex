@@ -1,21 +1,22 @@
-\chapter{Reproducibility Record}\label{app:repro}
+\chapter{Reproducibility record}\label{app:repro}
 
-\section{Code and Environment}
+\section{Code and environment}
 
-All code, configuration files, logs and evaluation outputs are in the project
-repository at \url{https://github.com/whynotramaa/fcsg-capstone}. Model code
-lives in \texttt{models/} and \texttt{src/fcsg\_net/}, training in
+The project repository at \url{https://github.com/whynotramaa/fcsg-capstone}
+holds all code, configuration files, logs and evaluation outputs. Model code
+is in \texttt{models/} and \texttt{src/fcsg\_net/}, training in
 \texttt{training/train.py}, and evaluation and plotting in
-\texttt{evaluation/}. Every model is selected by a configuration file in
-\texttt{configs/}; the four composite runs use \texttt{fcsg.toml},
+\texttt{evaluation/}. A configuration file in \texttt{configs/} selects each
+model. The four composite runs use \texttt{fcsg.toml},
 \texttt{dncnn\_composite.toml}, \texttt{ffdnet\_blind.toml} and
-\texttt{ffdnet\_composite.toml}, which differ only in the model and noise map.
+\texttt{ffdnet\_composite.toml}. They differ only in the model and the noise
+map.
 
-Training, verification and diagnostics ran on Kaggle with an NVIDIA Tesla T4,
-Python 3.12.13, PyTorch 2.10.0 with CUDA 12.8, NumPy 2.0.2 and Pillow 11.3.0.
-Local machines were used only to edit and package code.
+We ran training, verification and diagnostics on Kaggle with an NVIDIA Tesla
+T4, Python 3.12.13, PyTorch 2.10.0 with CUDA 12.8, NumPy 2.0.2 and Pillow
+11.3.0. Local machines were only for editing and packaging code.
 
-\section{Where Each Result Comes From}
+\section{Where each result comes from}
 
 \begin{table}[htbp]
 	\centering
@@ -37,16 +38,16 @@ Local machines were used only to edit and package code.
 	\end{tabular}
 \end{table}
 
-\section{Artefact Identifiers}
+\section{Artefact identifiers}
 
-Each Kaggle run packaged its source code into a bundle whose SHA-256 hash was
-recorded, so the exact code behind every result can be identified even after
-later edits. Table~\ref{tab:hashes} lists the first sixteen hexadecimal digits
-of each hash; the full values are in the source manifests.
+Each Kaggle run packed its source code into a bundle and recorded the
+bundle's SHA-256 hash. Even after later edits, the hash pins down the exact
+code behind each result. Table~\ref{tab:hashes} lists the first sixteen hex
+digits of each hash. The source manifests hold the full values.
 
 \begin{table}[htbp]
 	\centering
-	\caption{SHA-256 identifiers (first 16 hex digits) of evaluated artefacts.}
+	\caption{SHA-256 identifiers (first 16 hex digits) of the evaluated artefacts.}
 	\label{tab:hashes}
 	\small
 	\begin{tabular}{@{}ll@{}}
@@ -64,20 +65,21 @@ of each hash; the full values are in the source manifests.
 	\end{tabular}
 \end{table}
 
-\section{How to Reproduce}
+\section{How to reproduce}
 
 \begin{enumerate}
-	\item Attach the DIV2K dataset to a Kaggle notebook with a GPU and run
+	\item Attach the DIV2K dataset to a Kaggle notebook with a GPU. Run
 	\texttt{notebooks/checks.ipynb}, then the bundled milestone notebook
 	\texttt{notebooks/phase1\_phase2.ipynb}. Both stop at the first failed
 	check.
 	\item Build and push one training notebook per configuration with
 	\texttt{python notebooks/build\_phase3.py fcsg ffdnet\_blind
-	ffdnet\_composite dncnn\_composite}. Runs longer than one session resume
-	from their last checkpoint when rebuilt with \texttt{--resume}.
-	\item At 200,000 updates each run evaluates the 100 validation images and
+	ffdnet\_composite dncnn\_composite}. To continue a run that outlasts one
+	session, rebuild it with \texttt{--resume}. It picks up from its last
+	checkpoint.
+	\item At 200,000 updates, each run evaluates the 100 validation images and
 	writes \texttt{evaluation.json} and \texttt{status.json}.
-	\item Build the diagnostic notebook with
-	\texttt{python notebooks/build\_diagnostics.py} to measure latency, tiling
-	and routing, and draw figures with \texttt{python evaluation/plots.py}.
+	\item To measure latency, tiling and routing, build the diagnostic notebook
+	with \texttt{python notebooks/build\_diagnostics.py}. Draw the figures with
+	\texttt{python evaluation/plots.py}.
 \end{enumerate}

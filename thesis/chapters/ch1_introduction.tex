@@ -2,38 +2,35 @@
 
 \section{Motivation}\label{sec:motivation}
 
-Old photographs rarely suffer from a single, clean corruption. A print that
-was scanned at modest resolution, stored as a heavily compressed JPEG and
-captured in the first place through a soft lens on grainy film carries all of
-those defects at once. Each of them leaves its mark on a different part of the
-image spectrum. Optical softening removes high spatial frequencies. Resampling
-discards detail above a resolution limit and introduces interpolation
-artefacts. Sensor and film noise spreads energy roughly evenly across
-frequencies, so it dominates wherever the true signal is weak, which in
-natural images means the high frequencies. Block-based JPEG compression
-quantises the mid and high frequency coefficients of each $8\times8$ block and
-leaves blocking and ringing behind.
+An old photograph is rarely damaged in just one way. Take a print shot
+through a soft lens on grainy film, scanned at low resolution and saved as a
+heavily compressed JPEG. It carries all four defects, and each one hits a
+different part of the spectrum. Optical softening removes high spatial
+frequencies. Resampling throws away detail above a resolution limit and adds
+interpolation artefacts. Sensor and film noise spreads energy roughly evenly
+across frequencies. In natural images the true signal is weakest at high
+frequencies, so that is where noise dominates. JPEG quantises the mid and
+high frequency coefficients of each $8\times8$ block, which leaves blocking
+and ringing.
 
-Most learned restoration networks treat this mixture as one problem. A deep
-convolutional network such as DnCNN \cite{zhang2017dncnn} sees the whole
-degraded image and learns, implicitly, how to undo every corruption in it.
-Larger transformer-based restorers such as Restormer
-\cite{zamir2022restormer} are very effective, but their tens of millions of
-parameters put them out of reach for the low-cost hardware that an archive,
-a library or a hobbyist is likely to own.
+Most learned restoration networks treat this mixture as a single problem.
+DnCNN \cite{zhang2017dncnn}, a deep convolutional network, sees the whole
+degraded image and learns to undo every corruption in it without being told
+which is which. Transformer restorers such as Restormer
+\cite{zamir2022restormer} work very well, but they have tens of millions of
+parameters. An archive, a library or a hobbyist with modest hardware cannot
+run them.
 
-This project starts from a simple observation. If different corruptions live
-in different frequency bands, it might be useful to split the image into
-bands explicitly and let a small network decide, for every band and every
-location, which kind of filter suits it best. A large kernel can follow
-smooth, slowly varying structure. A small kernel can respond to fine detail
-and to the high-frequency residue of noise. A learned gate can choose between
-them pixel by pixel. We call the resulting network \fcsg{}, a
-frequency-conditioned, spatially gated network, and we study it under a
-strict budget: fewer than five million parameters and fewer than ten GFLOPs
-for a $256\times256$ input.
+We started from a simple idea. If each corruption sits in its own frequency
+band, we could split the image into bands explicitly and let a small network
+pick a filter for every band at every location. A large kernel suits smooth,
+slowly varying structure. A small kernel responds to fine detail and to the
+high-frequency part of the noise. A learned gate chooses between them pixel
+by pixel. We call the result \fcsg{}, a frequency-conditioned, spatially
+gated network. We hold it to a strict budget of fewer than five million
+parameters and fewer than ten GFLOPs for a $256\times256$ input.
 
-\section{Problem Statement}\label{sec:problem}
+\section{Problem statement}\label{sec:problem}
 
 Let $f \in [0,1]^{H\times W\times3}$ be a clean RGB image and let
 \begin{equation}
@@ -41,79 +38,79 @@ Let $f \in [0,1]^{H\times W\times3}$ be a clean RGB image and let
 	\theta = (\sigma_\text{blur},\, s,\, \sigma_n,\, q)
 	\label{eq:degradation}
 \end{equation}
-be a degraded observation produced by Gaussian blur of width
+be a degraded observation. $\mathcal{D}$ applies Gaussian blur of width
 $\sigma_\text{blur}$, bicubic down- and up-sampling by a factor $s$, additive
-Gaussian noise of standard deviation $\sigma_n$ and JPEG compression at
-quality $q$. The parameters $\theta$ are drawn at random for every image and
-are not given to the restoration model. The task is to learn a mapping
-$g_\phi$ such that $\hat f = g_\phi(x)$ is close to $f$, measured by PSNR,
-SSIM and LPIPS, subject to two hard resource limits:
+Gaussian noise with standard deviation $\sigma_n$ and JPEG compression at
+quality $q$. We draw $\theta$ at random for every image and never give it to
+the restoration model. The task is to learn a mapping $g_\phi$ whose output
+$\hat f = g_\phi(x)$ is close to $f$ in PSNR, SSIM and LPIPS. The network
+must also meet two hard limits:
 \begin{itemize}
-	\item the network has fewer than $5\times10^{6}$ trainable parameters, and
-	\item one forward pass on a $256\times256$ RGB input costs fewer than 10
-	reported GFLOPs.
+	\item fewer than $5\times10^{6}$ trainable parameters, and
+	\item fewer than 10 reported GFLOPs for one forward pass on a
+	$256\times256$ RGB input.
 \end{itemize}
 
-\section{Research Hypothesis and Objectives}\label{sec:objectives}
+\section{Hypothesis and objectives}\label{sec:objectives}
 
-The working hypothesis of the project is the following. \emph{Spatial top-2
-routing over shared convolutional experts of different kernel sizes, applied
-after a fixed radial frequency decomposition, yields a routing policy that
-varies with image content and with the degradation, and that the trained
-network relies on for its output quality, while staying within the stated
-budget.} We deliberately phrase this as something to be tested rather than
-as a claim of superiority.
+We test one hypothesis. \emph{Apply a fixed radial frequency decomposition,
+then route each band per pixel to the top two of several shared
+convolutional experts with different kernel sizes. The learned routing will
+change with image content and with the degradation, the trained network will
+depend on it for output quality, and the whole model will stay inside the
+budget.} We wrote this as a claim to check, not as a promise that the network
+beats anything.
 
-The work is organised around four objectives:
+The work has four objectives.
 \begin{enumerate}
-	\item[\textbf{O1}] Build \fcsg{} and verify it: exact band reconstruction,
-	parameter and FLOP limits, memory, gradient flow and the ability to
-	overfit a single image (Chapters~\ref{ch:method} and~\ref{ch:setup}).
-	\item[\textbf{O2}] Establish trustworthy baselines by reproducing published
-	FFDNet behaviour and training DnCNN on a known Gaussian task
+	\item[\textbf{O1}] Build \fcsg{} and check that it behaves as designed.
+	The checks cover exact band reconstruction, the parameter and FLOP
+	limits, memory, gradient flow and overfitting a single image
+	(Chapters~\ref{ch:method} and~\ref{ch:setup}).
+	\item[\textbf{O2}] Get baselines we can trust. We reproduce a published
+	FFDNet result and train DnCNN on a Gaussian task with a known outcome
 	(Chapter~\ref{ch:setup}).
 	\item[\textbf{O3}] Train \fcsg{}, DnCNN and two FFDNet variants under one
-	matched composite degradation protocol and compare quality, size, compute
-	and measured latency (Chapter~\ref{ch:results}).
-	\item[\textbf{O4}] Characterise the learned routing: where it sends each
-	band, how it relates to the sampled degradation, and how much the trained
-	model depends on it (Chapter~\ref{ch:routing}).
+	matched composite degradation protocol. Compare quality, size, compute and
+	measured latency (Chapter~\ref{ch:results}).
+	\item[\textbf{O4}] Describe what the router learned. Where does it send
+	each band, how does that relate to the sampled degradation, and how much
+	does the trained model rely on it (Chapter~\ref{ch:routing})?
 \end{enumerate}
 
 \section{Contributions}\label{sec:contributions}
 
-The contributions of this report are practical and specific:
+This report makes four concrete contributions.
 \begin{itemize}
-	\item A frequency-band, spatially routed restoration network with 97,088
-	parameters and 9.39 reported GFLOPs at $256\times256$, together with the
-	verification tests that establish that it does what its equations say.
-	\item A matched comparison in which DnCNN, blind FFDNet, oracle FFDNet and
-	\fcsg{} are all trained from scratch on the same synthetic composite
-	degradation, with the same schedule, the same number of updates and the
-	same evaluation protocol.
-	\item A routing analysis that relates per-pixel expert weights to the
-	recorded degradation parameters and measures the effect of overriding the
-	gate at inference time.
-	\item An honest account of the outcome. \fcsg{} reaches 27.24\dB{} against
-	27.83\dB{} for DnCNN and 28.19\dB{} for blind FFDNet with 5.7 times fewer
-	parameters than DnCNN, but it is not faster on a GPU, because a low FLOP
-	count did not translate into low latency.
+	\item A restoration network that routes frequency bands spatially, with
+	97,088 parameters and 9.39 reported GFLOPs at $256\times256$. We also give
+	the tests showing the code matches the equations.
+	\item A matched comparison. We train DnCNN, blind FFDNet, oracle FFDNet and
+	\fcsg{} from scratch on the same synthetic composite degradation, with the
+	same schedule, the same number of updates and the same evaluation
+	protocol.
+	\item A routing analysis. We relate per-pixel expert weights to the
+	recorded degradation parameters and measure what happens when we override
+	the gate at inference.
+	\item A plain account of how it turned out. \fcsg{} reaches 27.24\dB{},
+	against 27.83\dB{} for DnCNN and 28.19\dB{} for blind FFDNet, with 5.7
+	times fewer parameters than DnCNN. It is not faster on a GPU. Its low FLOP
+	count did not become low latency.
 \end{itemize}
-We do not claim state-of-the-art restoration quality, and we do not claim that
-frequency decomposition or expert routing are new ideas. Both are well
-established in prior work (Chapter~\ref{ch:literature}). What we test is one
-particular combination of them under a tight budget.
+We make no claim of state-of-the-art quality. Frequency decomposition and
+expert routing both have a long history (Chapter~\ref{ch:literature}). We
+test one specific combination of them under a tight budget.
 
-\section{Organisation of the Report}\label{sec:organisation}
+\section{Organisation of the report}\label{sec:organisation}
 
 Chapter~\ref{ch:literature} reviews restoration networks, frequency-domain
-methods and mixture-of-experts routing, and positions \fcsg{} among them.
-Chapter~\ref{ch:method} describes the degradation model and the network,
-module by module. Chapter~\ref{ch:setup} covers the data pipeline, the
-baselines, the training and evaluation protocols and the verification
-experiments. Chapter~\ref{ch:results} reports restoration quality and
-computational cost. Chapter~\ref{ch:routing} analyses the learned routing.
-Chapter~\ref{ch:conclusion} summarises the findings and their limitations and
-lists the experiments that should come next. Appendix~\ref{app:repro} records
-what is needed to reproduce the work, and Appendix~\ref{app:per-image} lists
-per-image results.
+methods and mixture-of-experts routing, and places \fcsg{} among them.
+Chapter~\ref{ch:method} describes the degradation model and then the network
+one module at a time. Chapter~\ref{ch:setup} covers the data pipeline,
+baselines, training and evaluation protocols, and the verification runs.
+Chapter~\ref{ch:results} reports restoration quality and computational cost.
+Chapter~\ref{ch:routing} looks at the learned routing.
+Chapter~\ref{ch:conclusion} sums up the findings and their limits and lists
+the experiments we would run next. Appendix~\ref{app:repro} records what
+anyone needs to reproduce the work, and Appendix~\ref{app:per-image} lists
+results for every image.

@@ -1,40 +1,39 @@
-\chapter{Conclusion and Future Work}\label{ch:conclusion}
+\chapter{Conclusion and future work}\label{ch:conclusion}
 
 \section{Conclusion}\label{sec:summary}
 
 \fcsg{} splits an image into three frequency bands and routes each band, per
 pixel, to two of three shared convolutional experts. With 97,088 parameters
-and 9.39 GFLOPs it passed every pre-training check (O1), and our FFDNet code
-reproduced the published CBSD68 result to within 0.01\dB{} (O2). Under one
-matched composite-degradation protocol it reached 27.24\dB{}, 0.59\dB{} below
-DnCNN and 0.95\dB{} below blind FFDNet, with 82.6\% and 88.6\% fewer
-parameters respectively, yet it was the slowest model on a Tesla T4 (O3).
-Its gate varies spatially, tracks the noise level with correlations up to
-0.81, and the trained model loses 0.37\dB{} when its selections are
-overridden (O4). Frequency-band routing gave a small model inspectable
-behaviour, but not better accuracy or speed than simple baselines.
+and 9.39 GFLOPs, it passed every check before training (O1). Our FFDNet code
+matched the published CBSD68 result to within 0.01\dB{} (O2). Under one
+matched composite-degradation protocol, \fcsg{} reached 27.24\dB{}. That is
+0.59\dB{} below DnCNN and 0.95\dB{} below blind FFDNet, with 82.6\% and
+88.6\% fewer parameters. It was also the slowest model on a Tesla T4 (O3).
+Its gate varies across the image and follows the noise level, with
+correlations up to 0.81. The trained model loses 0.37\dB{} when we override
+the gate's choices (O4). Frequency-band routing gave a small model behaviour
+we can inspect. It did not beat simple baselines on accuracy or speed.
 
 \section{Limitations}\label{sec:limitations}
 
-Each model was trained once, and all results are on the validation split
-with no untouched test set. The degradation is synthetic; we did not test on
-real archival photographs or run a human study. The routing analysis uses ten
-images and exploratory correlations, and the interventions measure the
-trained model's dependence on its gate rather than the value of having one.
-Latency was measured on one GPU without an operator profile. All experts are
-always computed, so sparse routing saves no computation.
+We trained each model once, and all results come from the validation split,
+with no untouched test set. The degradation is synthetic. We did not test on
+real archival photographs or run a human study. The routing analysis rests on
+ten images and exploratory correlations. The interventions measure how much
+the trained model leans on its gate, not what a gate adds during training. We
+measured latency on one GPU without an operator profile. Every expert always
+runs, so sparse routing saves no computation.
 
-\section{Future Work}\label{sec:future}
+\section{Future work}\label{sec:future}
 
-The most important next step is a matched training ablation comparing
-learned routing against fixed uniform weights from the same initialisation,
-with several seeds, followed by ablations of the kernel sizes, a per-image
-gate, plain concatenation instead of SE fusion, and hard masks. Since the
-model relies mainly on which experts it picks, skipping unselected experts
-could cut up to a third of the expert cost, but an operator profile should
-come first, along with latency measurements on CPU and mobile hardware.
-Widening the experts within the parameter budget, which is fifty times larger
-than the model uses, would address the capacity gap if cheaper expert
-evaluation frees compute. Finally, any claim about archival restoration
-needs real archival images, a controlled degradation sweep and a held-out
-test set.
+The first experiment to run is a matched training ablation. It would compare
+learned routing with fixed uniform weights, from the same initialisation and
+with several seeds. Further ablations would test the kernel sizes, a
+per-image gate, plain concatenation in place of SE fusion, and hard masks.
+The model relies mainly on which experts it picks, so skipping unselected
+experts could save up to a third of the expert cost. An operator profile
+should come first, along with latency measurements on CPU and mobile
+hardware. The parameter budget is fifty times what the model uses, so
+widening the experts could close the capacity gap, provided cheaper expert
+evaluation frees up compute. Last, any claim about archival restoration needs
+real archival images, a controlled degradation sweep and a held-out test set.
