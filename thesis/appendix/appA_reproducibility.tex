@@ -1,15 +1,49 @@
 \chapter{Reproducibility Record}\label{app:repro}
-% Everything an examiner would need to rerun the work. Hashes live HERE,
-% never in the main chapters.
-% SOURCES: technical report "Experimental provenance", results/*/source_manifest.json,
-% output/pdf/fcsg-report-assets/evidence_index.json, README.md.
 
 \section{Code and Environment}
-% Repository URL + commit hash of the final submission. Kaggle T4,
-% Python 3.12.13, torch 2.10.0+cu128.
-\todo{fill}
 
-\section{Source Bundles and Checkpoints}
+All code, configuration files, logs and evaluation outputs are in the project
+repository at \url{https://github.com/whynotramaa/fcsg-capstone}. Model code
+lives in \texttt{models/} and \texttt{src/fcsg\_net/}, training in
+\texttt{training/train.py}, and evaluation and plotting in
+\texttt{evaluation/}. Every model is selected by a configuration file in
+\texttt{configs/}; the four composite runs use \texttt{fcsg.toml},
+\texttt{dncnn\_composite.toml}, \texttt{ffdnet\_blind.toml} and
+\texttt{ffdnet\_composite.toml}, which differ only in the model and noise map.
+
+Training, verification and diagnostics ran on Kaggle with an NVIDIA Tesla T4,
+Python 3.12.13, PyTorch 2.10.0 with CUDA 12.8, NumPy 2.0.2 and Pillow 11.3.0.
+Local machines were used only to edit and package code.
+
+\section{Where Each Result Comes From}
+
+\begin{table}[htbp]
+	\centering
+	\caption{Source files for the results in this report.}
+	\label{tab:sources}
+	\small
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		Result & File \\
+		\midrule
+		Verification checks (Table~\ref{tab:gates}) & \texttt{results/milestone\_run\_20260925/} \\
+		Gaussian DnCNN (Table~\ref{tab:gaussian})   & \texttt{results/benchmark.csv} \\
+		Composite results (Table~\ref{tab:main})     & \texttt{results/phase3/*/evaluation.json} \\
+		Per-image results (Appendix~\ref{app:per-image}) & \texttt{results/phase3/per\_image\_scores.csv} \\
+		Training curves                              & \texttt{results/phase3/*/train\_log.csv} \\
+		Latency, tiling, routing                     & \texttt{results/diagnostics/} \\
+		Figures                                      & \texttt{output/pdf/fcsg-report-assets/} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Artefact Identifiers}
+
+Each Kaggle run packaged its source code into a bundle whose SHA-256 hash was
+recorded, so the exact code behind every result can be identified even after
+later edits. Table~\ref{tab:hashes} lists the first sixteen hexadecimal digits
+of each hash; the full values are in the source manifests.
+
 \begin{table}[htbp]
 	\centering
 	\caption{SHA-256 identifiers (first 16 hex digits) of evaluated artefacts.}
@@ -19,19 +53,31 @@
 		\toprule
 		Artefact & SHA-256 prefix \\
 		\midrule
-		Phase 3 source bundle      & \texttt{85d6e16f72ead013} \\
-		Diagnostics source bundle  & \texttt{d473bc10b0ad0c1e} \\
-		Ablation source bundle     & \texttt{4617fba4429c7b7f} \\
-		D2 paired-data manifest    & \texttt{7ce7f310bdb4d2d5} \\
-		\fcsg{} checkpoint         & \texttt{8db0bb0f3c251ddc} \\
-		DnCNN checkpoint           & \texttt{afb0abfa022ede04} \\
-		FFDNet blind checkpoint    & \texttt{981560c18cbea134} \\
-		FFDNet oracle checkpoint   & \texttt{ef9560e8ed1ebae0} \\
+		Composite training source bundle & \texttt{85d6e16f72ead013} \\
+		Diagnostics source bundle        & \texttt{d473bc10b0ad0c1e} \\
+		5,000-pair dataset manifest      & \texttt{7ce7f310bdb4d2d5} \\
+		\fcsg{} checkpoint               & \texttt{8db0bb0f3c251ddc} \\
+		DnCNN checkpoint                 & \texttt{afb0abfa022ede04} \\
+		FFDNet blind checkpoint          & \texttt{981560c18cbea134} \\
+		FFDNet oracle checkpoint         & \texttt{ef9560e8ed1ebae0} \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
 \section{How to Reproduce}
-% Short numbered list adapted from README.md: build tiles, run checks notebook,
-% build_phase3.py, push kernels, evaluation/plots.py.
-\todo{fill}
+
+\begin{enumerate}
+	\item Attach the DIV2K dataset to a Kaggle notebook with a GPU and run
+	\texttt{notebooks/checks.ipynb}, then the bundled milestone notebook
+	\texttt{notebooks/phase1\_phase2.ipynb}. Both stop at the first failed
+	check.
+	\item Build and push one training notebook per configuration with
+	\texttt{python notebooks/build\_phase3.py fcsg ffdnet\_blind
+	ffdnet\_composite dncnn\_composite}. Runs longer than one session resume
+	from their last checkpoint when rebuilt with \texttt{--resume}.
+	\item At 200,000 updates each run evaluates the 100 validation images and
+	writes \texttt{evaluation.json} and \texttt{status.json}.
+	\item Build the diagnostic notebook with
+	\texttt{python notebooks/build\_diagnostics.py} to measure latency, tiling
+	and routing, and draw figures with \texttt{python evaluation/plots.py}.
+\end{enumerate}

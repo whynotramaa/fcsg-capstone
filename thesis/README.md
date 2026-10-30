@@ -1,3 +1,32 @@
+# FCSG-Net final report
+
+This folder holds the B.Tech project report, built on the NIT Rourkela
+`DissertationGuidelinesV4_5` template. All chapters, appendices, the abstract
+and the acknowledgement are written. The repository is the source for every
+number; `\evidence{}` markers in the .tex point at the file behind a table.
+
+Scope: Phases 1 to 3 (verification, FFDNet reproduction, matched composite
+training of FCSG-Net, DnCNN and two FFDNet variants) plus the routing
+diagnostics run on the Phase 3 checkpoints. The Phase 4 routing ablation is
+left out and appears only as future work.
+
+Still to fill in `FrontPages.tex`: student names and roll numbers, and the
+supervisor's name. Those are the only red `[TODO]` marks left in the PDF.
+
+Build:
+
+```
+cd thesis && latexmk -pdf -outdir=build main.tex
+```
+
+`NITR.cls` and `FrontPages.tex` here are stand-ins written because the
+college bundle did not include them. Replace both with the department's
+versions when available and copy our field values across.
+
+---
+
+The rest of this file is the original planning note, kept for reference.
+
 # FCSG-Net final report: plan and scaffold
 
 This folder is the final B.Tech report, laid out on the NIT Rourkela

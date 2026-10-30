@@ -1,30 +1,59 @@
 % ======================================================================
 % Front-page fields. STAND-IN layout: when the college FrontPages.tex
 % arrives, copy these values into its fields and replace this file.
-% Everything in \todo is for the team to fill.
+% Items in \todo still need the team's details.
 % ======================================================================
 \reportTitle{FCSG-Net: Frequency-Band Spatial Expert Routing\\for Lightweight Composite Image Restoration}
 \docType{Project Report}
 \degree{Bachelor of Technology}
-\dept{\todo{Department name}}
+\dept{Computer Science and Engineering}
 \authors{\todo{Student Name 1 (Roll No.)}\\\todo{Student Name 2 (Roll No.)}}
-\supervisorOne{\todo{Prof. Supervisor Name}}
-\supervisorTwo{\todo{Prof. Co-Supervisor Name}}
+\newcommand{\supname}{\todo{Prof. Supervisor Name}}
+\supervisorOne{\supname}
 \submitDate{November 2026}
 
-\dedicationText{\todo{Dedication, or remove \textbackslash dedication from main.tex}}
+\ackText{%
+We are grateful to our supervisor, \supname, for guidance throughout this
+project.
 
-\ackText{\todo{Acknowledgement. Thank supervisor(s), department, Kaggle for
-GPU time, the DIV2K and KAIR authors. Half a page, plain and specific.}}
+We thank the Department of Computer Science and Engineering, National
+Institute of Technology Rourkela, for the opportunity to carry out this work.
+Our experiments were run on GPUs provided free of charge by Kaggle, without
+which training four models for 200,000 updates each would not have been
+possible.
 
-\abstractText{\todo{Write last, about 250 words, one paragraph. Cover: the
-problem (composite archival degradation under a 5M parameter / 10 GFLOP
-budget); the method (fixed radial frequency split, shared 7x7/5x5/3x3
-experts, spatial top-2 gate); the result (27.24 dB on 100 DIV2K validation
-images with 97,088 parameters against 27.83 dB for DnCNN at 558,403, slower
-on a T4 despite fewer FLOPs); the routing finding (gate tracks noise level,
-r = +0.81; overriding it costs 0.37 dB); and the status of the matched
-routing ablation.}}
+We also thank the authors of DIV2K for making their dataset public, and
+Kai Zhang and colleagues for releasing the FFDNet code and pretrained weights
+that let us check our implementation against a published result.
+
+Finally, we thank our families and friends for their patience and support.
+}
+
+\abstractText{%
+Archival photographs usually suffer from several degradations at once:
+optical blur, loss of resolution, sensor or film noise and lossy JPEG
+compression. Each affects a different part of the image spectrum. This
+project studies whether a very small restoration network can exploit that
+structure. The proposed network, FCSG-Net, splits the degraded image into
+low, mid and high frequency bands with fixed, soft radial masks in the
+Fourier domain, processes every band with three shared convolutional experts
+of kernel size $7\times7$, $5\times5$ and $3\times3$, and uses a lightweight
+gate to select the two most suitable experts for each band at every pixel.
+The model has 97,088 parameters and costs 9.39 GFLOPs for a $256\times256$
+input. We train FCSG-Net, DnCNN and two FFDNet variants from scratch on the
+same synthetic composite degradation of DIV2K images, using one schedule and
+one evaluation protocol, after verifying the implementation and reproducing
+the published FFDNet result to within 0.01\,dB. On 100 validation images
+FCSG-Net reaches 27.24\,dB PSNR, against 27.83\,dB for DnCNN and 28.19\,dB
+for blind FFDNet, while using 82.6\% fewer parameters than DnCNN. Its low
+FLOP count does not translate into speed: on a Tesla T4 GPU it is the slowest
+of the four models. The learned routing is spatially varying and tracks the
+noise level, with within-image correlations up to 0.81, and overriding the
+gate's selections at inference costs 0.37\,dB on average. Frequency-band
+routing thus gives a small model inspectable behaviour, but within this
+budget it does not make the model more accurate or faster than simple
+convolutional baselines.
+}
 
 \keywords{image restoration, frequency decomposition, mixture of experts,
 spatial routing, lightweight networks}
