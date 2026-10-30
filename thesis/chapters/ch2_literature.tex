@@ -1,0 +1,53 @@
+\chapter{Background and Related Work}\label{ch:literature}
+% LENGTH: 7-10 pages.
+% SOURCE: notes/related.md is already written in prose. Adapt it, do not
+% rewrite from scratch. Plan.md section 4 has the reading list.
+% RULE: published numbers from other papers come from different datasets and
+% protocols. Quote them as context only, never inside our results tables.
+
+\section{Image Restoration with CNNs}\label{sec:lit-cnn}
+% DnCNN (residual learning) and FFDNet (noise-level map, pixel unshuffle).
+% Mention NAFNet as the efficiency reference and Restormer/SwinIR as the
+% heavy end. Keep these two short.
+\todo{adapt from notes/related.md "Foundations"}
+
+\section{Frequency-Domain Restoration}\label{sec:lit-freq}
+% MWCNN (wavelet subbands), FFC, SFNet/FSNet (closest neighbour, spend the
+% most words here), FFTformer. Spectral bias (Rahaman) for motivation.
+% The positioning sentence must be precise: SFNet does learned local frequency
+% selection; we use FIXED radial masks then learned spatial expert mixing.
+\todo{adapt}
+
+\section{Mixture of Experts and Gating}\label{sec:lit-moe}
+% Shazeer sparse MoE, Switch Transformer routing stability, load balancing
+% vs our entropy regulariser. SE networks for the fusion block.
+% Be honest: we compute every expert, so we get sparse WEIGHTS, not sparse
+% COMPUTE. Say it here so the examiner does not find it later.
+\todo{adapt}
+
+\section{Evaluation Metrics}\label{sec:lit-metrics}
+% PSNR, SSIM, LPIPS: one paragraph each with the formula for PSNR and what
+% LPIPS measures, and why it can disagree with PSNR.
+\todo{write}
+
+\section{Research Gap}\label{sec:gap}
+% Comparison table: rows = methods, cols = frequency decomposition? learned
+% routing? spatial routing? params. Keep the old proposal gap table OUT unless
+% MWCNN/SFNet/FFTformer are added to it (plan.md section 0.1).
+\begin{table}[htbp]
+	\centering
+	\caption{Positioning of \fcsg{} against closely related methods.}
+	\label{tab:gap}
+	\begin{tabular}{@{}lcccl@{}}
+		\toprule
+		Method & Freq.\ split & Learned routing & Spatial & Notes \\
+		\midrule
+		DnCNN \cite{zhang2017dncnn}     & -- & -- & -- & residual CNN \\
+		FFDNet \cite{zhang2018ffdnet}   & -- & -- & -- & noise map input \\
+		MWCNN \cite{liu2018mwcnn}       & wavelet & -- & -- & joint subbands \\
+		SFNet \cite{cui2023sfnet}       & learned & \todo{check} & \todo{check} & closest prior \\
+		Sparse MoE \cite{shazeer2017moe}& -- & yes & -- & token routing \\
+		\fcsg{} (ours)                  & radial FFT & top-2 & per pixel & 97k params \\
+		\bottomrule
+	\end{tabular}
+\end{table}

@@ -1,0 +1,11 @@
+% Shared macros. Keep this file small.
+
+% Writer notes. Every \todo prints in red so nothing ships half-written.
+% Before final submission: grep -rn '\\todo' thesis/ must return nothing.
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO:} #1\textbf{]}}}
+% Where a number came from. Renders nothing, exists for reviewers of the .tex.
+\newcommand{\evidence}[1]{}
+
+\newcommand{\fcsg}{FCSG-Net}
+\newcommand{\dB}{\,dB}
+\newcommand{\expert}[1]{$E_{#1\times#1}$}   % \expert{7} -> E_{7x7}

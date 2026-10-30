@@ -1,0 +1,67 @@
+\chapter{Experimental Setup and Verification}\label{ch:setup}
+% LENGTH: 6-8 pages.
+% SOURCES: configs/*.toml, training/train.py, results/milestone_status.md,
+% results/milestone_run_20260925/*.json, README.md.
+% Purpose: convince the examiner the numbers in Ch 5 are trustworthy.
+
+\section{Dataset and Data Pipeline}\label{sec:data}
+% DIV2K: 800 train / 100 valid. 32 fixed 128x128 crops per train image cached
+% as a uint8 memmap (25,600 tiles). Flips + rot90. Degradation applied online.
+% D2 snapshot: 5,000 fixed pairs, seed 1234, for reproducibility.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{pipeline.pdf}
+	\caption{Training data pipeline.}
+	\label{fig:pipeline}
+\end{figure}
+\todo{write}
+
+\section{Baselines}\label{sec:baselines}
+% DnCNN (558,403 params), FFDNet blind (sigma map fixed at 27.5/255) and
+% FFDNet oracle (true sigma, upper bound). All trained FROM SCRATCH on the
+% same composite degradation. Explain why both FFDNet rows exist.
+\todo{write}
+
+\section{Training Protocol}\label{sec:training}
+% AdamW, lr 2e-4 cosine to 1e-6, batch 16 at 128x128, AMP fp16 + GradScaler,
+% 200k steps for all four models (reduced from planned 300k: Kaggle quota,
+% say so plainly). Tesla T4 on Kaggle; checkpoint/resume every 2k steps.
+\begin{table}[htbp]
+	\centering
+	\caption{Training hyperparameters, identical for every method.}
+	\label{tab:hparams}
+	\todo{fill from configs/*.toml}
+\end{table}
+\todo{write; reuse schedules.pdf for lr and lambda_ent schedule}
+
+\section{Evaluation Protocol}\label{sec:evalproto}
+% Final metrics: all 100 DIV2K valid images, tiled 256 with 32 px overlap,
+% fixed per-image degradation seed. PSNR/SSIM/LPIPS on RGB.
+% Training-time validation used 16 fixed crops: those numbers are NOT
+% comparable with full-image numbers (30.59 vs 27.24 dB for FCSG). Say it.
+% Tiling sensitivity: point forward to tiling.pdf in Ch 5.
+\todo{write}
+
+\section{Implementation Verification}\label{sec:verification}
+% Short. One table, one paragraph. These gates are why we trust the code.
+\begin{table}[htbp]
+	\centering
+	\caption{Pre-training verification gates (Kaggle T4).}
+	\label{tab:gates}
+	\evidence{results/milestone_status.md}
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Check & Criterion & Measured \\
+		\midrule
+		FFDNet reproduction (CBSD68, $\sigma{=}25$) & within 0.5\dB{} of 31.21 & 31.220\dB \\
+		Band reconstruction & $x_L{+}x_M{+}x_H = x$ & max error $6.0\times10^{-7}$ \\
+		Parameter budget    & $< 5$M   & 97,088 \\
+		Compute budget      & $< 10$ GFLOPs @256 & 9.39 \\
+		Memory              & $< 4$ GB & 0.60 GB peak reserved \\
+		Single-image overfit & MSE ratio $< 0.25$ & 0.19 \\
+		Checkpoint resume   & identical outputs & passed \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+% Optional figure: overfit.pdf. The Gaussian-only DnCNN result
+% (32.646 dB DIV2K, sigma 25) can go in one sentence as a pipeline sanity check.

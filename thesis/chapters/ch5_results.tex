@@ -1,0 +1,61 @@
+\chapter{Restoration Results and Computational Cost}\label{ch:results}
+% LENGTH: 8-10 pages.
+% SOURCES: results/benchmark.csv, results/phase3/*/evaluation.json,
+% results/phase3/per_image_scores.csv, results/diagnostics/summary.json.
+% FRAMING (important): FCSG-Net is ~1 dB behind the baselines. Do not hide it,
+% do not apologise for it. The chapter's story is the quality / size / latency
+% trade-off, plotted, plus an honest note that low FLOPs did not buy speed.
+
+\section{Quantitative Comparison}\label{sec:main-table}
+\begin{table}[htbp]
+	\centering
+	\caption{Composite restoration on 100 DIV2K validation images after 200k steps.
+	Input PSNR is 20.992\dB{} for every method.}
+	\label{tab:main}
+	\evidence{results/benchmark.csv rows phase3-div2k-composite}
+	\begin{tabular}{@{}lrrrrrr@{}}
+		\toprule
+		Method & PSNR$\uparrow$ & Gain & SSIM$\uparrow$ & LPIPS$\downarrow$ & Params & GFLOPs \\
+		\midrule
+		DnCNN            & 27.831 & 6.838 & 0.7795 & 0.3242 & 558,403 & 73.43 \\
+		FFDNet (blind)   & 28.190 & 7.197 & 0.7899 & 0.3176 & 852,108 & 27.89 \\
+		FFDNet (oracle)$^\dagger$ & 28.240 & 7.247 & 0.7920 & 0.3162 & 852,108 & 27.89 \\
+		\fcsg{}          & 27.243 & 6.250 & 0.7529 & 0.3961 &  97,088 &  9.39 \\
+		\bottomrule
+		\multicolumn{7}{@{}l}{\footnotesize $^\dagger$Given the true noise $\sigma$; an upper bound, not a fair competitor.}
+	\end{tabular}
+\end{table}
+% Then the trade-off figure: PSNR vs params (log x). This is THE figure of the
+% report (plan.md risk table). benchmark.pdf may already be close; if not,
+% add a small script under evaluation/ that draws it from benchmark.csv.
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.85\linewidth]{benchmark.pdf}
+	\caption{Quality against model size and compute.}
+	\label{fig:benchmark}
+\end{figure}
+\todo{write: what the gap is, 82.6\% fewer params and 87.2\% fewer GFLOPs than DnCNN}
+
+\section{Per-Image Analysis}\label{sec:per-image}
+% per_image_errors.pdf. Where does FCSG lose most? Correlate with input PSNR
+% if it shows something. Full table goes to Appendix B, not here.
+\todo{write}
+
+\section{Qualitative Results}\label{sec:qualitative}
+% One figure with 4 subfigures: qualitative_fcsg / _dncnn / _blind / _oracle.
+% Pick crops that show texture and flat regions. Label with whole-image PSNR.
+\todo{assemble subfigure panel}
+
+\section{Training Convergence}\label{sec:convergence}
+% convergence.pdf, training_entropy.pdf. Note the late validation plateau and
+% that it gives no evidence longer training would close the gap.
+\todo{write}
+
+\section{Latency, Memory and Tiling}\label{sec:latency}
+% Median 256x256 FP32 forward on T4: FCSG 19.40 ms, DnCNN 18.04 ms,
+% FFDNet 6.30 ms. FCSG is SLOWEST despite fewest FLOPs.
+% Explain why: 9 expert passes (all computed, no conditional dispatch),
+% depthwise convs are memory-bound, FFT/iFFT overhead, small kernels launch-bound.
+% This paragraph is a genuine finding. Write it as one.
+% Figures: compute_latency.pdf, latency_memory.pdf, tiling.pdf.
+\todo{write}

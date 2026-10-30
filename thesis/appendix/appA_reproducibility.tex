@@ -1,0 +1,37 @@
+\chapter{Reproducibility Record}\label{app:repro}
+% Everything an examiner would need to rerun the work. Hashes live HERE,
+% never in the main chapters.
+% SOURCES: technical report "Experimental provenance", results/*/source_manifest.json,
+% output/pdf/fcsg-report-assets/evidence_index.json, README.md.
+
+\section{Code and Environment}
+% Repository URL + commit hash of the final submission. Kaggle T4,
+% Python 3.12.13, torch 2.10.0+cu128.
+\todo{fill}
+
+\section{Source Bundles and Checkpoints}
+\begin{table}[htbp]
+	\centering
+	\caption{SHA-256 identifiers (first 16 hex digits) of evaluated artefacts.}
+	\label{tab:hashes}
+	\small
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		Artefact & SHA-256 prefix \\
+		\midrule
+		Phase 3 source bundle      & \texttt{85d6e16f72ead013} \\
+		Diagnostics source bundle  & \texttt{d473bc10b0ad0c1e} \\
+		Ablation source bundle     & \texttt{4617fba4429c7b7f} \\
+		D2 paired-data manifest    & \texttt{7ce7f310bdb4d2d5} \\
+		\fcsg{} checkpoint         & \texttt{8db0bb0f3c251ddc} \\
+		DnCNN checkpoint           & \texttt{afb0abfa022ede04} \\
+		FFDNet blind checkpoint    & \texttt{981560c18cbea134} \\
+		FFDNet oracle checkpoint   & \texttt{ef9560e8ed1ebae0} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{How to Reproduce}
+% Short numbered list adapted from README.md: build tiles, run checks notebook,
+% build_phase3.py, push kernels, evaluation/plots.py.
+\todo{fill}

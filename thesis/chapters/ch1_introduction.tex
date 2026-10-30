@@ -1,0 +1,52 @@
+\chapter{Introduction}\label{ch:intro}
+% LENGTH: 5-7 pages. No results tables here. One figure at most.
+% TONE: this chapter sells the QUESTION, not the outcome. Our model does not
+% win on PSNR, so the intro must not promise that it will.
+
+\section{Motivation}\label{sec:motivation}
+% - Archival / legacy photographs suffer several corruptions at once:
+%   softening (blur), resolution loss, sensor/film noise, lossy storage (JPEG).
+% - Each of these hits a different part of the frequency spectrum.
+%   Noise and JPEG blocking live mostly in high frequencies, blur removes them.
+% - Heavy restoration models (Restormer, SwinIR) handle this but cost tens of
+%   millions of parameters. Cite them only as the contrast, do not compare.
+% - Question we care about: can a very small model (< 5M params, < 10 GFLOPs)
+%   split the image into frequency bands and route each band, per pixel,
+%   to a kernel size that suits it?
+\todo{write 2-3 paragraphs}
+
+\section{Problem Statement}\label{sec:problem}
+% One paragraph, formal. Input: degraded RGB image x = D(f; theta) with theta =
+% (blur sigma, scale, noise sigma, JPEG quality). Output: estimate of f.
+% Hard constraints: params < 5M, reported GFLOPs < 10 at 256x256.
+\todo{write}
+
+\section{Research Hypothesis and Objectives}\label{sec:objectives}
+% Phrase as a testable hypothesis, not a claim:
+%   H: spatial top-2 routing over shared kernel-size experts, applied after
+%      fixed radial frequency decomposition, gives a routing policy that
+%      (a) varies with image content and degradation and (b) matters to output
+%      quality, within the stated budget.
+% Objectives (numbered list, each maps to a later chapter):
+%   O1 build + verify the architecture        -> Ch 3, Sec 4.3
+%   O2 matched comparison against baselines    -> Ch 5
+%   O3 characterise the learned routing         -> Ch 6
+%   O4 test whether routing helps in training   -> Sec 6.4 (ablation)
+% Optional: reuse figure "objectives.pdf" here.
+\todo{write}
+
+\section{Contributions}\label{sec:contributions}
+% Bulleted, factual, defensible. Nothing we cannot point at in results/.
+%  - Frequency-band + spatially routed expert network at 97,088 parameters.
+%  - Matched composite-degradation benchmark: DnCNN, blind FFDNet, oracle
+%    FFDNet, FCSG-Net, all same data, schedule, steps, eval protocol.
+%  - Routing analysis: spatial maps, correlation with recorded degradation
+%    parameters, inference-time interventions.
+%  - Negative / mixed findings reported plainly (lower PSNR, higher latency
+%    despite fewer FLOPs).
+% DO NOT write: "novel", "state of the art", "first to". See notes/related.md.
+\todo{write}
+
+\section{Organisation of the Report}\label{sec:organisation}
+% One sentence per chapter. Write this LAST.
+\todo{write last}
