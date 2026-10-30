@@ -1,0 +1,696 @@
+% FCSG-Net B.Tech research project report, SHORT version (about 30 pages).
+% The full version is main.tex; both share FrontPages.tex, macros and Ref/.
+% Built on the NIT Rourkela DissertationGuidelinesV4_5 template (copy kept in
+% college_reference/). Needs the college bundle files listed in thesis/README.md
+% (NITR.cls, FrontPages.tex, Ref/*.bst) before it will compile.
+\documentclass[12pt,a4paper,oneside]{NITR}
+
+\usepackage[hyphens]{url}
+\usepackage[none]{hyphenat}
+\usepackage{amsmath,amsfonts,mathdots,amssymb}  % template also loads yfonts (blackletter), unused here
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{trees,shapes}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{subcaption}
+\usepackage{siunitx}            % aligned decimals in result tables
+\sisetup{group-separator={,},group-minimum-digits=4}
+
+% Report figures are already generated as vector PDFs by
+% evaluation/build_technical_report.py. Reference them in place, do not copy.
+\graphicspath{{figures/}}
+% ===== begin macros.tex =====
+% Shared macros. Keep this file small.
+
+% Writer notes. Every \todo prints in red so nothing ships half-written.
+% Before final submission: grep -rn '\\todo' thesis/ must return nothing.
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO:} #1\textbf{]}}}
+% Where a number came from. Renders nothing, exists for reviewers of the .tex.
+\newcommand{\evidence}[1]{}
+
+\newcommand{\fcsg}{FCSG-Net}
+\newcommand{\dB}{\,dB}
+\newcommand{\expert}[1]{$E_{#1\times#1}$}   % \expert{7} -> E_{7x7}
+
+% ===== end macros.tex =====
+
+
+\onehalfspacing
+\begin{document}
+\sloppy
+% ---------------------------------------------------------------- front matter
+% ===== begin FrontPages.tex =====
+% ======================================================================
+% Front-page fields. STAND-IN layout: when the college FrontPages.tex
+% arrives, copy these values into its fields and replace this file.
+% ======================================================================
+\reportTitle{FCSG-Net: Frequency-Band Spatial Expert Routing\\for Lightweight Composite Image Restoration}
+\docType{Project Report}
+\degree{Bachelor of Technology}
+\dept{Computer Science and Engineering}
+% Ascending order of roll number.
+\authors{Akshat Mittal (123CS0954)\\Risav Rathi (123CS0957)\\Ramnath Thakur (123CS0965)}
+\authorsInline{Akshat Mittal (123CS0954), Risav Rathi (123CS0957) and Ramnath Thakur (123CS0965)}
+\newcommand{\supname}{Dr.\ Shyampada Mukherjee}
+\supervisorOne{\supname}
+\submitDate{November 2026}
+
+\ackText{%
+We are grateful to our supervisor, \supname, for guidance throughout this
+project.
+
+We thank the Department of Computer Science and Engineering, National
+Institute of Technology Rourkela, for the opportunity to carry out this work.
+Our experiments were run on GPUs provided free of charge by Kaggle, without
+which training four models for 200,000 updates each would not have been
+possible.
+
+We also thank the authors of DIV2K for making their dataset public, and
+Kai Zhang and colleagues for releasing the FFDNet code and pretrained weights
+that let us check our implementation against a published result.
+
+Finally, we thank our families and friends for their patience and support.
+}
+
+\abstractText{%
+Archival photographs usually suffer from several degradations at once:
+optical blur, loss of resolution, sensor or film noise and lossy JPEG
+compression. Each affects a different part of the image spectrum. This
+project studies whether a very small restoration network can exploit that
+structure. The proposed network, FCSG-Net, splits the degraded image into
+low, mid and high frequency bands with fixed, soft radial masks in the
+Fourier domain, processes every band with three shared convolutional experts
+of kernel size $7\times7$, $5\times5$ and $3\times3$, and uses a lightweight
+gate to select the two most suitable experts for each band at every pixel.
+The model has 97,088 parameters and costs 9.39 GFLOPs for a $256\times256$
+input. We train FCSG-Net, DnCNN and two FFDNet variants from scratch on the
+same synthetic composite degradation of DIV2K images, using one schedule and
+one evaluation protocol, after verifying the implementation and reproducing
+the published FFDNet result to within 0.01\,dB. On 100 validation images
+FCSG-Net reaches 27.24\,dB PSNR, against 27.83\,dB for DnCNN and 28.19\,dB
+for blind FFDNet, while using 82.6\% fewer parameters than DnCNN. Its low
+FLOP count does not translate into speed: on a Tesla T4 GPU it is the slowest
+of the four models. The learned routing is spatially varying and tracks the
+noise level, with within-image correlations up to 0.81, and overriding the
+gate's selections at inference costs 0.37\,dB on average. Frequency-band
+routing thus gives a small model inspectable behaviour, but within this
+budget it does not make the model more accurate or faster than simple
+convolutional baselines.
+}
+
+\keywords{image restoration, frequency decomposition, mixture of experts,
+spatial routing, lightweight networks}
+
+% ===== end FrontPages.tex =====
+            % college file: title, names, roll nos, guide(s)
+
+\coverPage
+\titlePage
+\certificateOfExamination
+
+\certificateOneSupervisor
+%\certificateTwoSupervisors
+
+%\dedication                    % add \dedicationText in FrontPages.tex to use
+\declaration
+\acknowledgment
+\abstract
+
+\tableofcontents
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\cleardoublepage
+
+% ---------------------------------------------------------------- main matter
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\textbf{Chapter \thechapter}}}
+% ===== begin short/ch1_introduction.tex =====
+\chapter{Introduction}\label{ch:intro}
+
+\section{Motivation and Problem}\label{sec:motivation}
+
+Old photographs rarely suffer from a single corruption. A print scanned at
+modest resolution, stored as a compressed JPEG and taken through a soft lens
+on grainy film carries all of those defects at once, and each affects a
+different part of the spectrum. Blur removes high frequencies, resampling
+discards detail above a resolution limit, noise dominates wherever the signal
+is weak (in natural images, the high frequencies), and JPEG quantises the mid
+and high frequencies of each $8\times8$ block. Most restoration networks
+treat the mixture as one problem, and the strongest of them, such as
+Restormer \cite{zamir2022restormer}, need tens of millions of parameters.
+
+This project asks whether a very small network can use that spectral
+structure explicitly: split the image into frequency bands, and let a learned
+gate choose, for every band and every pixel, between convolutional experts of
+different kernel sizes. We call the network \fcsg{}.
+
+Formally, a clean RGB image $f\in[0,1]^{H\times W\times 3}$ is degraded as
+$x=\mathcal{D}(f;\theta)$ with $\theta=(\sigma_\text{blur}, s, \sigma_n, q)$:
+Gaussian blur, bicubic down- and up-sampling by $s$, Gaussian noise of
+standard deviation $\sigma_n$, and JPEG at quality $q$. The parameters are
+random per image and hidden from the model. We seek $\hat f=g_\phi(x)$ close
+to $f$ in PSNR, SSIM and LPIPS, with fewer than five million parameters and
+fewer than ten GFLOPs for a $256\times256$ input.
+
+\section{Objectives and Contributions}\label{sec:objectives}
+
+We test the hypothesis that \emph{spatial top-2 routing over shared
+kernel-size experts, applied after a fixed frequency decomposition, yields a
+routing policy that varies with content and degradation and that the trained
+network relies on, within the budget.} The objectives are:
+\begin{enumerate}
+	\item[\textbf{O1}] build \fcsg{} and verify it before training;
+	\item[\textbf{O2}] establish trustworthy baselines by reproducing a
+	published FFDNet result;
+	\item[\textbf{O3}] compare \fcsg{}, DnCNN and two FFDNet variants trained
+	under one matched protocol, in quality, size and measured speed;
+	\item[\textbf{O4}] characterise the learned routing.
+\end{enumerate}
+
+The contributions are a 97,088-parameter network with its verification
+suite, a matched composite-degradation benchmark, a routing analysis linking
+expert weights to the recorded degradation, and a plain account of the
+outcome: \fcsg{} is within 0.6\dB{} of DnCNN with 5.7 times fewer parameters,
+but it is not faster on a GPU. We make no state-of-the-art or novelty claim;
+frequency decomposition and expert routing are both established
+(Chapter~\ref{ch:literature}).
+
+Chapter~\ref{ch:literature} reviews related work, Chapter~\ref{ch:method}
+describes the method, Chapter~\ref{ch:setup} the experimental setup and
+verification, Chapter~\ref{ch:results} the results and routing analysis, and
+Chapter~\ref{ch:conclusion} concludes.
+
+% ===== end short/ch1_introduction.tex =====
+
+% ===== begin short/ch2_related.tex =====
+\chapter{Related Work}\label{ch:literature}
+
+Published scores from the works below use other tasks, datasets or noise
+protocols, so they serve only as context. Our result tables contain only
+models we trained and evaluated ourselves.
+
+\paragraph{CNN restoration.} DnCNN \cite{zhang2017dncnn} showed that a deep
+stack of convolutions with batch normalisation learns denoising much more
+easily by predicting the noise residual. FFDNet \cite{zhang2018ffdnet}
+processes four half-resolution sub-images and takes a noise-level map as an
+extra input, so one network covers a range of noise strengths; the author's
+colour model \cite{kair} has 852,108 parameters and reports 31.21\dB{} on
+CBSD68 at $\sigma=25$. Its map describes only Gaussian noise, not blur or
+JPEG. NAFNet \cite{chen2022nafnet} and Restormer \cite{zamir2022restormer}
+mark the efficient and heavy ends of modern restoration and lie outside our
+budget.
+
+\paragraph{Frequency-domain restoration.} MWCNN \cite{liu2018mwcnn} replaces
+pooling in a U-Net with wavelet transforms and processes subbands jointly,
+which motivates our cross-band fusion. Fast Fourier Convolution
+\cite{chi2020ffc} adds a global Fourier branch to each layer. FFTformer
+\cite{kong2023fftformer} computes attention-related operations in the
+frequency domain. The closest work is SFNet \cite{cui2023sfnet} and FSNet
+\cite{cui2024fsnet}, which already perform local, content-adaptive frequency
+selection. Our distinction is narrower: \fcsg{} uses \emph{fixed} radial
+masks and puts the learned spatial decision in the choice among shared
+$7\times7$, $5\times5$ and $3\times3$ experts, which we can then compare with
+known degradation parameters.
+
+\paragraph{Mixture of experts.} Shazeer et al.\ \cite{shazeer2017moe} route
+each example to a few experts with a top-$k$ gate and balance load with
+auxiliary penalties; Switch Transformers \cite{fedus2022switch} simplify this
+to one expert per token. The efficiency argument for sparse experts depends on
+not running the unselected ones. Our implementation computes every expert
+and mixes them with sparse weights, so sparsity here aids analysis, not
+speed. The fusion stage uses squeeze-and-excitation \cite{hu2018se}.
+
+\paragraph{Metrics.} PSNR is $10\log_{10}(1/\mathrm{MSE})$ on $[0,1]$ RGB
+images, computed per image and averaged. SSIM \cite{wang2004ssim} uses an
+$11\times11$ Gaussian window ($\sigma=1.5$). LPIPS \cite{zhang2018lpips}
+measures distance between deep features (AlexNet variant); lower is better,
+and it can disagree with PSNR.
+
+Table~\ref{tab:gap} summarises the positioning. Each ingredient of \fcsg{} is
+established; the project studies one combination of them under a tight
+budget.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Positioning of \fcsg{} against closely related methods.}
+	\label{tab:gap}
+	\small
+	\begin{tabular}{@{}lcccl@{}}
+		\toprule
+		Method & Freq.\ split & Learned selection & Spatial & Notes \\
+		\midrule
+		DnCNN \cite{zhang2017dncnn}      & --         & --              & --        & residual CNN \\
+		FFDNet \cite{zhang2018ffdnet}    & --         & --              & --        & noise-map input \\
+		MWCNN \cite{liu2018mwcnn}        & wavelet    & --              & --        & joint subbands \\
+		SFNet \cite{cui2023sfnet}        & learned    & frequency       & local     & closest prior work \\
+		Sparse MoE \cite{shazeer2017moe} & --         & experts         & --        & per-example routing \\
+		\fcsg{} (ours)                   & radial FFT & experts, top-2  & per pixel & 97k parameters \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+% ===== end short/ch2_related.tex =====
+
+% ===== begin short/ch3_method.tex =====
+\chapter{Proposed Method: \fcsg}\label{ch:method}
+
+\section{Degradation Model}\label{sec:degradation}
+
+The synthetic pipeline applies four operations in physical order
+(Table~\ref{tab:degradation}). The image is quantised to 8 bits before blur
+and before JPEG encoding. Each sample stores its sampled parameters, which the
+network never sees but which we use to analyse the routing in
+Section~\ref{sec:routing}. The mean input PSNR on our validation set is
+20.99\dB{}.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Composite degradation, sampled independently for every image.}
+	\label{tab:degradation}
+	\small
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Stage & Parameter & Distribution \\
+		\midrule
+		Gaussian blur        & $\sigma_\text{blur}$ & $\mathcal{U}(0.5,\, 2.0)$ pixels \\
+		Down/up resampling   & scale $s$            & $\mathcal{U}(1.0,\, 2.0)$, bicubic \\
+		Additive noise       & $\sigma_n$           & $\mathcal{U}(5,\, 50)/255$, clipped \\
+		JPEG compression     & quality $q$          & integer in $\{30,\dots,95\}$, 4:4:4 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Architecture}\label{sec:arch}
+
+The input is split into low, mid and high frequency bands, each an ordinary
+RGB image. Three shared experts $E_7,E_5,E_3$ process every band, and a
+spatial gate gives each expert a weight per band and pixel, keeping the top
+two (Figure~\ref{fig:architecture}):
+\begin{align}
+	y_b(u,v) &= \textstyle\sum_{e} w_{b,e}(u,v)\, E_e(x_b)(u,v), \qquad b\in\{L,M,H\},\label{eq:mix}\\
+	\hat f &= x + \mathrm{Refine}\big(\mathrm{SEFusion}([y_L,y_M,y_H])\big).\label{eq:out}
+\end{align}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.95\linewidth]{architecture.pdf}
+	\caption{\fcsg{} data flow. Expert parameters are shared across bands.}
+	\label{fig:architecture}
+\end{figure}
+
+\paragraph{Frequency decomposition.} With $X$ the orthonormal real FFT of
+$x$ and $r$ the radial frequency in cycles per pixel, a soft low-pass mask of
+cutoff $c$ and width $\Delta=0.05$ is
+$\mathrm{LP}_c(r)=\tfrac12\big(1+\cos(\pi\,\mathrm{clip}((r-c)/\Delta+\tfrac12,0,1))\big)$.
+With $r_1=0.10$ and $r_2=0.25$ the band masks are $M_L=\mathrm{LP}_{r_1}$,
+$M_M=\mathrm{LP}_{r_2}-\mathrm{LP}_{r_1}$ and $M_H=1-\mathrm{LP}_{r_2}$, and
+$x_b=\mathcal{F}^{-1}(M_b X)$. Three choices matter. The masks sum to one, so
+$x_L+x_M+x_H=x$ exactly. Cutoffs are normalised frequencies rather than FFT
+bin indices, so a band means the same thing on a $128\times128$ training crop
+as on a full image. And each band returns to the spatial domain before any
+learning: a convolution over a spectrum has no clear meaning and complex
+inputs make training unstable, so the experts stay plain real-valued CNNs.
+
+\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle
+\cite{shi2016espcn} (12 channels at half resolution), a $1\times1$
+convolution to 48 channels, four residual blocks of two depthwise-separable
+stages \cite{chollet2017xception} with kernel $k\in\{7,5,3\}$, a $1\times1$
+tail added to the unshuffled input, and a pixel shuffle back. Separable,
+half-resolution processing is what keeps nine expert passes inside the
+compute budget. We name the experts only by kernel size, since we have no
+evidence about what each one specialises in.
+
+\paragraph{Spatial top-2 gate.} A per-image gate would be a lookup table
+that tends to settle on a constant choice. Our gate pools the mean and mean of
+squares of the nine band channels in $16\times16$ windows, maps these 18
+statistics through a $18\to24\to9$ network to one logit per band and expert,
+and upsamples the logits to full resolution. At each pixel the two largest
+logits per band are kept and softmax-normalised; the third expert gets zero
+weight. The dense softmax $p_{b,e}$ over all three is kept for the loss. The
+gate has 681 parameters. All experts are still computed before mixing.
+
+\paragraph{Fusion and refinement.} The nine band channels pass through a
+squeeze-and-excitation block \cite{hu2018se}, a $1\times1$ projection to RGB
+and three $3\times3$ convolutions ($3\to16\to16\to3$). The output is a
+residual added to the input, as in DnCNN.
+
+\section{Training Objective}\label{sec:loss}
+
+\begin{equation}
+	\mathcal{L}=\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}+\lambda_\text{ent}(t)\,\mathcal{L}_\text{ent}.
+\end{equation}
+$\mathcal{L}_\text{char}=\operatorname{mean}\sqrt{(\hat f-f)^2+\varepsilon^2}$,
+$\varepsilon=10^{-3}$, is the Charbonnier loss \cite{charbonnier1994}.
+$\mathcal{L}_\text{freq}$ is the mean absolute FFT of the error, which weights
+all frequencies equally. $\mathcal{L}_\text{ent}=\sum_b\operatorname{mean}
+\sum_e p_{b,e}\log p_{b,e}$ is negative routing entropy; minimising it keeps
+all experts in use early on. Its coefficient decays linearly from 0.01 to 0
+so that the gate is free to commit by the end. The baselines use the same
+loss without the entropy term.
+
+\section{Size and Compute}\label{sec:size}
+
+\fcsg{} has 97,088 parameters: 39,228, 30,012 and 23,868 in the $7\times7$,
+$5\times5$ and $3\times3$ experts, 681 in the gate, 96 in fusion and 3,203 in
+refinement. We count each multiply-accumulate as two FLOPs and add an
+estimate for the FFTs; a $256\times256$ pass costs 4.66 GMACs, or 9.39
+GFLOPs, inside the limit. Section~\ref{sec:cost} shows this count was a poor
+predictor of running time.
+
+% ===== end short/ch3_method.tex =====
+
+% ===== begin short/ch4_setup.tex =====
+\chapter{Experimental Setup}\label{ch:setup}
+
+\section{Data, Baselines and Training}\label{sec:training}
+
+We use DIV2K \cite{agustsson2017div2k}: 800 training images and 100
+validation images, the latter used for every reported result. Training uses
+a cache of 32 fixed $128\times128$ crops per training image (25,600 tiles),
+with random flips and rotations, and applies the degradation on the fly, so
+every epoch sees new corruptions. A fixed set of 5,000 pairs (seed 1234) was
+also exported for reproducibility.
+
+The baselines are an RGB DnCNN (17 layers, width 64, 558,403 parameters) and
+FFDNet in the author's colour configuration (852,108 parameters) in two
+variants. \emph{Oracle} FFDNet receives the true sampled noise level, which
+no real user would have, so it is an upper reference. \emph{Blind} FFDNet
+receives a constant map of $27.5/255$ and sees exactly what the other models
+see. All four models are trained from scratch with the same settings
+(Table~\ref{tab:hparams}). Each model was trained once with an unfixed seed,
+on a Tesla T4 in Kaggle sessions that resume from checkpoints.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Training configuration, identical for every method.}
+	\label{tab:hparams}
+	\small
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		Setting & Value \\
+		\midrule
+		Optimiser and schedule & AdamW \cite{loshchilov2019adamw}, $2\times10^{-4}$ cosine \cite{loshchilov2017sgdr} to $10^{-6}$ \\
+		Updates and batch      & 200,000; 16 crops of $128\times128$ \\
+		Loss                   & $\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}$ (+ entropy for \fcsg{}) \\
+		Precision              & FP16 mixed precision \cite{micikevicius2018amp} \\
+		Hardware               & NVIDIA Tesla T4 (Kaggle) \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Evaluation Protocol}\label{sec:evalproto}
+
+Each of the 100 validation images is degraded once with a seed equal to its
+index, so all models see identical inputs. Inference uses $256\times256$
+tiles with 32-pixel overlap, averaged where tiles overlap. Training-time
+validation on 16 fixed crops is used only for monitoring; it is not
+comparable with full-image results (30.59 against 27.24\dB{} for \fcsg{}).
+
+\section{Verification and Baseline Reproduction}\label{sec:verification}
+
+Before training, a notebook on the same T4 ran the checks in
+Table~\ref{tab:gates} and stopped at any failure. The overfit check is the
+most useful: a model that cannot memorise one image in 200 steps has a bug,
+and it is better to learn that in seconds than after ten hours of training.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Pre-training verification checks.}
+	\label{tab:gates}
+	\small
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Check & Criterion & Measured \\
+		\midrule
+		FFDNet weights, CBSD68 $\sigma{=}25$ & within 0.5\dB{} of 31.21 & 31.220\dB \\
+		Band reconstruction & $x_L{+}x_M{+}x_H = x$ & max error $6.0\times10^{-7}$ \\
+		Parameters / GFLOPs at $256^2$ & $<5$M / $<10$ & 97,088 / 9.39 \\
+		Memory, forward + backward & $< 4$ GB & 0.60 GB \\
+		One-image overfit, 200 steps & MSE $<0.01$, $<\frac14$ initial & ratio 0.18 \\
+		Checkpoint restore, reproducible data & identical & passed \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+To validate the FFDNet code against a published number we evaluated the
+author's pretrained colour weights \cite{kair} on the 68 CBSD68 images
+\cite{martin2001bsd} with the author's protocol, obtaining 31.220\dB{}
+against 31.21\dB{} in the paper, a difference of 0.01\dB{}. As an end-to-end
+check of the training loop, DnCNN trained on clipped Gaussian noise at
+$\sigma=25$ reached 32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.
+
+% ===== end short/ch4_setup.tex =====
+
+% ===== begin short/ch5_results.tex =====
+\chapter{Results and Analysis}\label{ch:results}
+
+\section{Restoration Quality}\label{sec:main-table}
+
+Table~\ref{tab:main} gives the main result on the 100 validation images.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Composite restoration on 100 DIV2K validation images after
+	200,000 updates (input PSNR 20.992\dB{}). GFLOPs at $256\times256$.}
+	\label{tab:main}
+	\small
+	\begin{tabular}{@{}lrrrrr@{}}
+		\toprule
+		Method & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & Params & GFLOPs \\
+		\midrule
+		DnCNN                     & 27.831 & 0.7795 & 0.3242 & 558,403 & 73.43 \\
+		FFDNet, blind             & 28.190 & 0.7899 & 0.3176 & 852,108 & 27.89 \\
+		FFDNet, oracle$^\dagger$  & 28.240 & 0.7920 & 0.3162 & 852,108 & 27.89 \\
+		\fcsg{}                   & 27.243 & 0.7529 & 0.3961 &  97,088 &  9.39 \\
+		\bottomrule
+		\multicolumn{6}{@{}l}{\footnotesize $^\dagger$Given the true noise level; an upper reference.}
+	\end{tabular}
+\end{table}
+
+\fcsg{} improves the input by 6.25\dB{} but is the weakest model on all three
+metrics: 0.59\dB{} behind DnCNN and 0.95\dB{} behind blind FFDNet, with a
+proportionally larger gap in LPIPS. It does this with 82.6\% fewer parameters
+and 87.2\% fewer reported FLOPs than DnCNN, and 88.6\% fewer parameters and
+66.3\% fewer FLOPs than FFDNet. The deficit is systematic rather than driven by
+a few images: both FFDNet variants beat \fcsg{} on all 100 images, and DnCNN
+beats it on 93. The six images where \fcsg{} wins against DnCNN, by up to
+2.07\dB{}, show that the two designs fail in different places.
+
+Blind FFDNet is the strongest fair model even though its noise map is
+constant, so its advantage comes from the architecture rather than from
+noise conditioning. The oracle map adds only 0.05\dB{}, because noise is one
+of four corruptions. Validation curves had flattened for all models by
+200,000 updates, so we have no evidence that longer training would close the
+gap. Figure~\ref{fig:qual} shows an example restoration.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{subfigure}{\linewidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{qualitative_fcsg.pdf}
+		\caption{\fcsg{}}
+	\end{subfigure}\\[1ex]
+	\begin{subfigure}{\linewidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{qualitative_blind.pdf}
+		\caption{FFDNet, blind}
+	\end{subfigure}
+	\caption{Degraded input, restoration and clean target on validation images
+	0801 and 0802 (top-left $320\times320$ region; PSNR is for the whole image).}
+	\label{fig:qual}
+\end{figure}
+
+\section{Computational Cost}\label{sec:cost}
+
+Table~\ref{tab:latency} reports median FP32 forward latency at batch 1 on a
+Tesla T4 after warm-up.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Median forward latency (ms) and peak inference memory at $256^2$ (Tesla T4, FP32).}
+	\label{tab:latency}
+	\small
+	\begin{tabular}{@{}lrrrr@{}}
+		\toprule
+		Method & $128^2$ & $256^2$ & $512^2$ & Peak MB \\
+		\midrule
+		\fcsg{}          & 5.10 & 19.40 & 75.59 & 51.3 \\
+		DnCNN            & 4.22 & 18.04 & 72.47 & 37.8 \\
+		FFDNet, blind    & 1.69 &  6.30 & 24.12 & 20.2 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Despite needing an eighth of DnCNN's FLOPs and a third of FFDNet's, \fcsg{} is
+the slowest model at every size and uses the most memory. Training showed the
+same pattern: 5.84 steps per second against 9.41 for DnCNN and 26.67 for
+FFDNet. We did not profile individual operators, so the explanation is our
+reading of the architecture: nine full expert passes per image, depthwise
+convolutions whose speed is limited by memory traffic rather than arithmetic,
+many small layers with launch overhead, and the FFTs. FFDNet runs one stack
+of dense $3\times3$ convolutions, which GPUs execute very efficiently. The FLOP
+budget set at the start was therefore the wrong proxy for speed on this
+hardware (Figure~\ref{fig:cost}). Tiling is not the cause of the quality gap:
+changing the tile size from 256 to 512 pixels changes \fcsg{} by only
+0.013\dB{} on a ten-image subset.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.95\linewidth]{compute_latency.pdf}
+	\caption{Validation PSNR against reported GFLOPs (left) and measured
+	$256\times256$ latency (right).}
+	\label{fig:cost}
+\end{figure}
+
+\section{Routing Analysis}\label{sec:routing}
+
+We analysed the final \fcsg{} checkpoint on ten validation images, each
+degraded with eight seeds (80 samples, ten independent images).
+
+\paragraph{Where the gate routes.} The dense routing probabilities end close
+to uniform (mean entropy 1.09 to 1.10 nats per band against a maximum of
+1.10), which alone would suggest the gate learned nothing. The top-2
+selection says otherwise. In the high band the $3\times3$ expert is selected
+at 99.98\% of pixels, with the second slot shared between the larger experts
+depending on location. The maps follow image structure
+(Figure~\ref{fig:routing-map}), and because top-2 selection switches when two
+logits swap rank, nearly uniform probabilities can still give a consistent
+and sharp choice.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\linewidth]{routing_0834.pdf}
+	\caption{Expert weights for validation image 0834. Rows: low, mid, high
+	band. Columns: degraded crop and weights of the $7\times7$, $5\times5$ and
+	$3\times3$ experts.}
+	\label{fig:routing-map}
+\end{figure}
+
+\paragraph{Routing versus degradation.} After removing each image's mean,
+the high-band $3\times3$ weight correlates at $r=+0.81$ with the noise level,
+the low-band $5\times5$ weight at $+0.80$ and the low-band $7\times7$ weight
+at $-0.73$: with more noise, the gate moves weight towards smaller kernels.
+The six strongest correlations are all with noise; the strongest with blur
+is $+0.42$ and with JPEG quality $-0.39$. These are exploratory results from
+ten images and 36 correlations without multiple-comparison correction, and
+the four parameters vary together, so they show a consistent response but
+not a causal one.
+
+\paragraph{Does the model need the gate?} Keeping the trained weights and
+overriding the gate at inference gives the changes in
+Table~\ref{tab:interventions}.
+
+\begin{table}[htbp]
+	\centering
+	\caption{PSNR change when the trained gate is overridden at inference (10 images).}
+	\label{tab:interventions}
+	\small
+	\begin{tabular}{@{}lrr@{}}
+		\toprule
+		Intervention & Mean $\Delta$PSNR & Min / max \\
+		\midrule
+		Equal weights on the selected pair     & $-0.040$\dB & $-0.137$ / $+0.028$ \\
+		Uniform weights over all three experts & $-0.372$\dB & $-0.986$ / $+0.163$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Flattening the weights within the chosen pair barely matters, while removing
+the choice itself costs 0.37\dB{} on average and nearly 1\dB{} on one image.
+The trained network depends on \emph{which} experts are combined far more than
+on how they are weighted. This shows the gate does real work in this model;
+whether a model trained without a gate would be worse needs a matched training
+ablation, which we leave to future work.
+
+\section{Discussion}\label{sec:discussion}
+
+The routing works in the sense we set out to test: it varies spatially,
+tracks the noise level and matters to the trained model. It does not make the
+model competitive. With under 100,000 parameters, \fcsg{} trails baselines six
+to nine times larger by 0.6 to 1.0\dB{}, most likely for lack of capacity, and
+on a GPU it is not faster. Frequency-band routing is a cheap way to make a
+small model's behaviour inspectable; within our budget it is not by itself a
+way to make it better or faster.
+
+% ===== end short/ch5_results.tex =====
+
+% ===== begin short/ch6_conclusion.tex =====
+\chapter{Conclusion and Future Work}\label{ch:conclusion}
+
+\section{Conclusion}\label{sec:summary}
+
+\fcsg{} splits an image into three frequency bands and routes each band, per
+pixel, to two of three shared convolutional experts. With 97,088 parameters
+and 9.39 GFLOPs it passed every pre-training check (O1), and our FFDNet code
+reproduced the published CBSD68 result to within 0.01\dB{} (O2). Under one
+matched composite-degradation protocol it reached 27.24\dB{}, 0.59\dB{} below
+DnCNN and 0.95\dB{} below blind FFDNet, with 82.6\% and 88.6\% fewer
+parameters respectively, yet it was the slowest model on a Tesla T4 (O3).
+Its gate varies spatially, tracks the noise level with correlations up to
+0.81, and the trained model loses 0.37\dB{} when its selections are
+overridden (O4). Frequency-band routing gave a small model inspectable
+behaviour, but not better accuracy or speed than simple baselines.
+
+\section{Limitations}\label{sec:limitations}
+
+Each model was trained once, and all results are on the validation split
+with no untouched test set. The degradation is synthetic; we did not test on
+real archival photographs or run a human study. The routing analysis uses ten
+images and exploratory correlations, and the interventions measure the
+trained model's dependence on its gate rather than the value of having one.
+Latency was measured on one GPU without an operator profile. All experts are
+always computed, so sparse routing saves no computation.
+
+\section{Future Work}\label{sec:future}
+
+The most important next step is a matched training ablation comparing
+learned routing against fixed uniform weights from the same initialisation,
+with several seeds, followed by ablations of the kernel sizes, a per-image
+gate, plain concatenation instead of SE fusion, and hard masks. Since the
+model relies mainly on which experts it picks, skipping unselected experts
+could cut up to a third of the expert cost, but an operator profile should
+come first, along with latency measurements on CPU and mobile hardware.
+Widening the experts within the parameter budget, which is fifty times larger
+than the model uses, would address the capacity gap if cheaper expert
+evaluation frees compute. Finally, any claim about archival restoration
+needs real archival images, a controlled degradation sweep and a held-out
+test set.
+
+% ===== end short/ch6_conclusion.tex =====
+
+\cleardoublepage
+
+% ---------------------------------------------------------------- back matter
+\rhead{\textit{References}}
+\lhead{}
+\renewcommand\bibname{References}
+\bibliographystyle{Ref/IEEEtran}   % CS/EE norm; the template lists it as an option
+{
+	\fontsize{10}{12}
+	\selectfont
+	\addcontentsline{toc}{chapter}{References}
+	\bibliography{Ref/references}
+}
+\cleardoublepage
+
+% Dissemination: keep only if a paper/poster/preprint exists. Otherwise delete.
+%\rhead{\textit{Dissemination}}
+%\lhead{}
+%\input{Ref/Dissemination}
+%\thispagestyle{empty}
+%\cleardoublepage
+
+% Index: the template ends with \indexColumns{3}\indexPage. It is only useful
+% if someone tags terms with \index{...} while writing. Drop it otherwise.
+%\indexColumns{3}
+%\indexPage
+\end{document}
