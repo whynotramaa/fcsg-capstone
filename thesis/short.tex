@@ -1,0 +1,93 @@
+% FCSG-Net B.Tech research project report, SHORT version (about 30 pages).
+% The full version is main.tex; both share FrontPages.tex, macros and Ref/.
+% Built on the NIT Rourkela DissertationGuidelinesV4_5 template (copy kept in
+% college_reference/). Needs the college bundle files listed in thesis/README.md
+% (NITR.cls, FrontPages.tex, Ref/*.bst) before it will compile.
+\documentclass[12pt,a4paper,oneside]{NITR}
+
+\usepackage[hyphens]{url}
+\usepackage[none]{hyphenat}
+\usepackage{amsmath,amsfonts,mathdots,amssymb}  % template also loads yfonts (blackletter), unused here
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{trees,shapes}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{subcaption}
+\usepackage{siunitx}            % aligned decimals in result tables
+\sisetup{group-separator={,},group-minimum-digits=4}
+
+% Report figures are already generated as vector PDFs by
+% evaluation/build_technical_report.py. Reference them in place, do not copy.
+\graphicspath{{figures/}{../output/pdf/fcsg-report-assets/}{../results/diagnostics/}}
+
+\input{macros}
+
+\onehalfspacing
+\begin{document}
+\sloppy
+% ---------------------------------------------------------------- front matter
+\include{FrontPages}            % college file: title, names, roll nos, guide(s)
+
+\coverPage
+\titlePage
+\certificateOfExamination
+
+\certificateOneSupervisor
+%\certificateTwoSupervisors
+
+%\dedication                    % add \dedicationText in FrontPages.tex to use
+\declaration
+\acknowledgment
+\abstract
+
+\tableofcontents
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\cleardoublepage
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\cleardoublepage
+
+% ---------------------------------------------------------------- main matter
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\textbf{Chapter \thechapter}}}
+
+\input{short/ch1_introduction}
+\input{short/ch2_related}
+\input{short/ch3_method}
+\input{short/ch4_setup}
+\input{short/ch5_results}
+\input{short/ch6_conclusion}
+\cleardoublepage
+
+% ---------------------------------------------------------------- back matter
+\rhead{\textit{References}}
+\lhead{}
+\renewcommand\bibname{References}
+\bibliographystyle{Ref/IEEEtran}   % CS/EE norm; the template lists it as an option
+{
+	\fontsize{10}{12}
+	\selectfont
+	\addcontentsline{toc}{chapter}{References}
+	\bibliography{Ref/references}
+}
+\cleardoublepage
+
+% Dissemination: keep only if a paper/poster/preprint exists. Otherwise delete.
+%\rhead{\textit{Dissemination}}
+%\lhead{}
+%\input{Ref/Dissemination}
+%\thispagestyle{empty}
+%\cleardoublepage
+
+% Index: the template ends with \indexColumns{3}\indexPage. It is only useful
+% if someone tags terms with \index{...} while writing. Drop it otherwise.
+%\indexColumns{3}
+%\indexPage
+\end{document}

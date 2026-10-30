@@ -1,0 +1,104 @@
+\chapter{Proposed Method: \fcsg}\label{ch:method}
+
+\section{Degradation Model}\label{sec:degradation}
+
+The synthetic pipeline applies four operations in physical order
+(Table~\ref{tab:degradation}). The image is quantised to 8 bits before blur
+and before JPEG encoding. Each sample stores its sampled parameters, which the
+network never sees but which we use to analyse the routing in
+Section~\ref{sec:routing}. The mean input PSNR on our validation set is
+20.99\dB{}.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Composite degradation, sampled independently for every image.}
+	\label{tab:degradation}
+	\small
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Stage & Parameter & Distribution \\
+		\midrule
+		Gaussian blur        & $\sigma_\text{blur}$ & $\mathcal{U}(0.5,\, 2.0)$ pixels \\
+		Down/up resampling   & scale $s$            & $\mathcal{U}(1.0,\, 2.0)$, bicubic \\
+		Additive noise       & $\sigma_n$           & $\mathcal{U}(5,\, 50)/255$, clipped \\
+		JPEG compression     & quality $q$          & integer in $\{30,\dots,95\}$, 4:4:4 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Architecture}\label{sec:arch}
+
+The input is split into low, mid and high frequency bands, each an ordinary
+RGB image. Three shared experts $E_7,E_5,E_3$ process every band, and a
+spatial gate gives each expert a weight per band and pixel, keeping the top
+two (Figure~\ref{fig:architecture}):
+\begin{align}
+	y_b(u,v) &= \textstyle\sum_{e} w_{b,e}(u,v)\, E_e(x_b)(u,v), \qquad b\in\{L,M,H\},\label{eq:mix}\\
+	\hat f &= x + \mathrm{Refine}\big(\mathrm{SEFusion}([y_L,y_M,y_H])\big).\label{eq:out}
+\end{align}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.95\linewidth]{architecture.pdf}
+	\caption{\fcsg{} data flow. Expert parameters are shared across bands.}
+	\label{fig:architecture}
+\end{figure}
+
+\paragraph{Frequency decomposition.} With $X$ the orthonormal real FFT of
+$x$ and $r$ the radial frequency in cycles per pixel, a soft low-pass mask of
+cutoff $c$ and width $\Delta=0.05$ is
+$\mathrm{LP}_c(r)=\tfrac12\big(1+\cos(\pi\,\mathrm{clip}((r-c)/\Delta+\tfrac12,0,1))\big)$.
+With $r_1=0.10$ and $r_2=0.25$ the band masks are $M_L=\mathrm{LP}_{r_1}$,
+$M_M=\mathrm{LP}_{r_2}-\mathrm{LP}_{r_1}$ and $M_H=1-\mathrm{LP}_{r_2}$, and
+$x_b=\mathcal{F}^{-1}(M_b X)$. Three choices matter. The masks sum to one, so
+$x_L+x_M+x_H=x$ exactly. Cutoffs are normalised frequencies rather than FFT
+bin indices, so a band means the same thing on a $128\times128$ training crop
+as on a full image. And each band returns to the spatial domain before any
+learning: a convolution over a spectrum has no clear meaning and complex
+inputs make training unstable, so the experts stay plain real-valued CNNs.
+
+\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle
+\cite{shi2016espcn} (12 channels at half resolution), a $1\times1$
+convolution to 48 channels, four residual blocks of two depthwise-separable
+stages \cite{chollet2017xception} with kernel $k\in\{7,5,3\}$, a $1\times1$
+tail added to the unshuffled input, and a pixel shuffle back. Separable,
+half-resolution processing is what keeps nine expert passes inside the
+compute budget. We name the experts only by kernel size, since we have no
+evidence about what each one specialises in.
+
+\paragraph{Spatial top-2 gate.} A per-image gate would be a lookup table
+that tends to settle on a constant choice. Our gate pools the mean and mean of
+squares of the nine band channels in $16\times16$ windows, maps these 18
+statistics through a $18\to24\to9$ network to one logit per band and expert,
+and upsamples the logits to full resolution. At each pixel the two largest
+logits per band are kept and softmax-normalised; the third expert gets zero
+weight. The dense softmax $p_{b,e}$ over all three is kept for the loss. The
+gate has 681 parameters. All experts are still computed before mixing.
+
+\paragraph{Fusion and refinement.} The nine band channels pass through a
+squeeze-and-excitation block \cite{hu2018se}, a $1\times1$ projection to RGB
+and three $3\times3$ convolutions ($3\to16\to16\to3$). The output is a
+residual added to the input, as in DnCNN.
+
+\section{Training Objective}\label{sec:loss}
+
+\begin{equation}
+	\mathcal{L}=\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}+\lambda_\text{ent}(t)\,\mathcal{L}_\text{ent}.
+\end{equation}
+$\mathcal{L}_\text{char}=\operatorname{mean}\sqrt{(\hat f-f)^2+\varepsilon^2}$,
+$\varepsilon=10^{-3}$, is the Charbonnier loss \cite{charbonnier1994}.
+$\mathcal{L}_\text{freq}$ is the mean absolute FFT of the error, which weights
+all frequencies equally. $\mathcal{L}_\text{ent}=\sum_b\operatorname{mean}
+\sum_e p_{b,e}\log p_{b,e}$ is negative routing entropy; minimising it keeps
+all experts in use early on. Its coefficient decays linearly from 0.01 to 0
+so that the gate is free to commit by the end. The baselines use the same
+loss without the entropy term.
+
+\section{Size and Compute}\label{sec:size}
+
+\fcsg{} has 97,088 parameters: 39,228, 30,012 and 23,868 in the $7\times7$,
+$5\times5$ and $3\times3$ experts, 681 in the gate, 96 in fusion and 3,203 in
+refinement. We count each multiply-accumulate as two FLOPs and add an
+estimate for the FFTs; a $256\times256$ pass costs 4.66 GMACs, or 9.39
+GFLOPs, inside the limit. Section~\ref{sec:cost} shows this count was a poor
+predictor of running time.

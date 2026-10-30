@@ -1,0 +1,78 @@
+\chapter{Experimental Setup}\label{ch:setup}
+
+\section{Data, Baselines and Training}\label{sec:training}
+
+We use DIV2K \cite{agustsson2017div2k}: 800 training images and 100
+validation images, the latter used for every reported result. Training uses
+a cache of 32 fixed $128\times128$ crops per training image (25,600 tiles),
+with random flips and rotations, and applies the degradation on the fly, so
+every epoch sees new corruptions. A fixed set of 5,000 pairs (seed 1234) was
+also exported for reproducibility.
+
+The baselines are an RGB DnCNN (17 layers, width 64, 558,403 parameters) and
+FFDNet in the author's colour configuration (852,108 parameters) in two
+variants. \emph{Oracle} FFDNet receives the true sampled noise level, which
+no real user would have, so it is an upper reference. \emph{Blind} FFDNet
+receives a constant map of $27.5/255$ and sees exactly what the other models
+see. All four models are trained from scratch with the same settings
+(Table~\ref{tab:hparams}). Each model was trained once with an unfixed seed,
+on a Tesla T4 in Kaggle sessions that resume from checkpoints.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Training configuration, identical for every method.}
+	\label{tab:hparams}
+	\small
+	\begin{tabular}{@{}ll@{}}
+		\toprule
+		Setting & Value \\
+		\midrule
+		Optimiser and schedule & AdamW \cite{loshchilov2019adamw}, $2\times10^{-4}$ cosine \cite{loshchilov2017sgdr} to $10^{-6}$ \\
+		Updates and batch      & 200,000; 16 crops of $128\times128$ \\
+		Loss                   & $\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}$ (+ entropy for \fcsg{}) \\
+		Precision              & FP16 mixed precision \cite{micikevicius2018amp} \\
+		Hardware               & NVIDIA Tesla T4 (Kaggle) \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{Evaluation Protocol}\label{sec:evalproto}
+
+Each of the 100 validation images is degraded once with a seed equal to its
+index, so all models see identical inputs. Inference uses $256\times256$
+tiles with 32-pixel overlap, averaged where tiles overlap. Training-time
+validation on 16 fixed crops is used only for monitoring; it is not
+comparable with full-image results (30.59 against 27.24\dB{} for \fcsg{}).
+
+\section{Verification and Baseline Reproduction}\label{sec:verification}
+
+Before training, a notebook on the same T4 ran the checks in
+Table~\ref{tab:gates} and stopped at any failure. The overfit check is the
+most useful: a model that cannot memorise one image in 200 steps has a bug,
+and it is better to learn that in seconds than after ten hours of training.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Pre-training verification checks.}
+	\label{tab:gates}
+	\small
+	\begin{tabular}{@{}lll@{}}
+		\toprule
+		Check & Criterion & Measured \\
+		\midrule
+		FFDNet weights, CBSD68 $\sigma{=}25$ & within 0.5\dB{} of 31.21 & 31.220\dB \\
+		Band reconstruction & $x_L{+}x_M{+}x_H = x$ & max error $6.0\times10^{-7}$ \\
+		Parameters / GFLOPs at $256^2$ & $<5$M / $<10$ & 97,088 / 9.39 \\
+		Memory, forward + backward & $< 4$ GB & 0.60 GB \\
+		One-image overfit, 200 steps & MSE $<0.01$, $<\frac14$ initial & ratio 0.18 \\
+		Checkpoint restore, reproducible data & identical & passed \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+To validate the FFDNet code against a published number we evaluated the
+author's pretrained colour weights \cite{kair} on the 68 CBSD68 images
+\cite{martin2001bsd} with the author's protocol, obtaining 31.220\dB{}
+against 31.21\dB{} in the paper, a difference of 0.01\dB{}. As an end-to-end
+check of the training loop, DnCNN trained on clipped Gaussian noise at
+$\sigma=25$ reached 32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.

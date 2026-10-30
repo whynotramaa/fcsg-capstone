@@ -1,0 +1,169 @@
+\chapter{Results and Analysis}\label{ch:results}
+
+\section{Restoration Quality}\label{sec:main-table}
+
+Table~\ref{tab:main} gives the main result on the 100 validation images.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Composite restoration on 100 DIV2K validation images after
+	200,000 updates (input PSNR 20.992\dB{}). GFLOPs at $256\times256$.}
+	\label{tab:main}
+	\small
+	\begin{tabular}{@{}lrrrrr@{}}
+		\toprule
+		Method & PSNR$\uparrow$ & SSIM$\uparrow$ & LPIPS$\downarrow$ & Params & GFLOPs \\
+		\midrule
+		DnCNN                     & 27.831 & 0.7795 & 0.3242 & 558,403 & 73.43 \\
+		FFDNet, blind             & 28.190 & 0.7899 & 0.3176 & 852,108 & 27.89 \\
+		FFDNet, oracle$^\dagger$  & 28.240 & 0.7920 & 0.3162 & 852,108 & 27.89 \\
+		\fcsg{}                   & 27.243 & 0.7529 & 0.3961 &  97,088 &  9.39 \\
+		\bottomrule
+		\multicolumn{6}{@{}l}{\footnotesize $^\dagger$Given the true noise level; an upper reference.}
+	\end{tabular}
+\end{table}
+
+\fcsg{} improves the input by 6.25\dB{} but is the weakest model on all three
+metrics: 0.59\dB{} behind DnCNN and 0.95\dB{} behind blind FFDNet, with a
+proportionally larger gap in LPIPS. It does this with 82.6\% fewer parameters
+and 87.2\% fewer reported FLOPs than DnCNN, and 88.6\% fewer parameters and
+66.3\% fewer FLOPs than FFDNet. The deficit is systematic rather than driven by
+a few images: both FFDNet variants beat \fcsg{} on all 100 images, and DnCNN
+beats it on 93. The six images where \fcsg{} wins against DnCNN, by up to
+2.07\dB{}, show that the two designs fail in different places.
+
+Blind FFDNet is the strongest fair model even though its noise map is
+constant, so its advantage comes from the architecture rather than from
+noise conditioning. The oracle map adds only 0.05\dB{}, because noise is one
+of four corruptions. Validation curves had flattened for all models by
+200,000 updates, so we have no evidence that longer training would close the
+gap. Figure~\ref{fig:qual} shows an example restoration.
+
+\begin{figure}[htbp]
+	\centering
+	\begin{subfigure}{\linewidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{qualitative_fcsg.pdf}
+		\caption{\fcsg{}}
+	\end{subfigure}\\[1ex]
+	\begin{subfigure}{\linewidth}
+		\centering
+		\includegraphics[width=0.85\linewidth]{qualitative_blind.pdf}
+		\caption{FFDNet, blind}
+	\end{subfigure}
+	\caption{Degraded input, restoration and clean target on validation images
+	0801 and 0802 (top-left $320\times320$ region; PSNR is for the whole image).}
+	\label{fig:qual}
+\end{figure}
+
+\section{Computational Cost}\label{sec:cost}
+
+Table~\ref{tab:latency} reports median FP32 forward latency at batch 1 on a
+Tesla T4 after warm-up.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Median forward latency (ms) and peak inference memory at $256^2$ (Tesla T4, FP32).}
+	\label{tab:latency}
+	\small
+	\begin{tabular}{@{}lrrrr@{}}
+		\toprule
+		Method & $128^2$ & $256^2$ & $512^2$ & Peak MB \\
+		\midrule
+		\fcsg{}          & 5.10 & 19.40 & 75.59 & 51.3 \\
+		DnCNN            & 4.22 & 18.04 & 72.47 & 37.8 \\
+		FFDNet, blind    & 1.69 &  6.30 & 24.12 & 20.2 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Despite needing an eighth of DnCNN's FLOPs and a third of FFDNet's, \fcsg{} is
+the slowest model at every size and uses the most memory. Training showed the
+same pattern: 5.84 steps per second against 9.41 for DnCNN and 26.67 for
+FFDNet. We did not profile individual operators, so the explanation is our
+reading of the architecture: nine full expert passes per image, depthwise
+convolutions whose speed is limited by memory traffic rather than arithmetic,
+many small layers with launch overhead, and the FFTs. FFDNet runs one stack
+of dense $3\times3$ convolutions, which GPUs execute very efficiently. The FLOP
+budget set at the start was therefore the wrong proxy for speed on this
+hardware (Figure~\ref{fig:cost}). Tiling is not the cause of the quality gap:
+changing the tile size from 256 to 512 pixels changes \fcsg{} by only
+0.013\dB{} on a ten-image subset.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.95\linewidth]{compute_latency.pdf}
+	\caption{Validation PSNR against reported GFLOPs (left) and measured
+	$256\times256$ latency (right).}
+	\label{fig:cost}
+\end{figure}
+
+\section{Routing Analysis}\label{sec:routing}
+
+We analysed the final \fcsg{} checkpoint on ten validation images, each
+degraded with eight seeds (80 samples, ten independent images).
+
+\paragraph{Where the gate routes.} The dense routing probabilities end close
+to uniform (mean entropy 1.09 to 1.10 nats per band against a maximum of
+1.10), which alone would suggest the gate learned nothing. The top-2
+selection says otherwise. In the high band the $3\times3$ expert is selected
+at 99.98\% of pixels, with the second slot shared between the larger experts
+depending on location. The maps follow image structure
+(Figure~\ref{fig:routing-map}), and because top-2 selection switches when two
+logits swap rank, nearly uniform probabilities can still give a consistent
+and sharp choice.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\linewidth]{routing_0834.pdf}
+	\caption{Expert weights for validation image 0834. Rows: low, mid, high
+	band. Columns: degraded crop and weights of the $7\times7$, $5\times5$ and
+	$3\times3$ experts.}
+	\label{fig:routing-map}
+\end{figure}
+
+\paragraph{Routing versus degradation.} After removing each image's mean,
+the high-band $3\times3$ weight correlates at $r=+0.81$ with the noise level,
+the low-band $5\times5$ weight at $+0.80$ and the low-band $7\times7$ weight
+at $-0.73$: with more noise, the gate moves weight towards smaller kernels.
+The six strongest correlations are all with noise; the strongest with blur
+is $+0.42$ and with JPEG quality $-0.39$. These are exploratory results from
+ten images and 36 correlations without multiple-comparison correction, and
+the four parameters vary together, so they show a consistent response but
+not a causal one.
+
+\paragraph{Does the model need the gate?} Keeping the trained weights and
+overriding the gate at inference gives the changes in
+Table~\ref{tab:interventions}.
+
+\begin{table}[htbp]
+	\centering
+	\caption{PSNR change when the trained gate is overridden at inference (10 images).}
+	\label{tab:interventions}
+	\small
+	\begin{tabular}{@{}lrr@{}}
+		\toprule
+		Intervention & Mean $\Delta$PSNR & Min / max \\
+		\midrule
+		Equal weights on the selected pair     & $-0.040$\dB & $-0.137$ / $+0.028$ \\
+		Uniform weights over all three experts & $-0.372$\dB & $-0.986$ / $+0.163$ \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Flattening the weights within the chosen pair barely matters, while removing
+the choice itself costs 0.37\dB{} on average and nearly 1\dB{} on one image.
+The trained network depends on \emph{which} experts are combined far more than
+on how they are weighted. This shows the gate does real work in this model;
+whether a model trained without a gate would be worse needs a matched training
+ablation, which we leave to future work.
+
+\section{Discussion}\label{sec:discussion}
+
+The routing works in the sense we set out to test: it varies spatially,
+tracks the noise level and matters to the trained model. It does not make the
+model competitive. With under 100,000 parameters, \fcsg{} trails baselines six
+to nine times larger by 0.6 to 1.0\dB{}, most likely for lack of capacity, and
+on a GPU it is not faster. Frequency-band routing is a cheap way to make a
+small model's behaviour inspectable; within our budget it is not by itself a
+way to make it better or faster.

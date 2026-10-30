@@ -1,0 +1,65 @@
+\chapter{Related Work}\label{ch:literature}
+
+Published scores from the works below use other tasks, datasets or noise
+protocols, so they serve only as context. Our result tables contain only
+models we trained and evaluated ourselves.
+
+\paragraph{CNN restoration.} DnCNN \cite{zhang2017dncnn} showed that a deep
+stack of convolutions with batch normalisation learns denoising much more
+easily by predicting the noise residual. FFDNet \cite{zhang2018ffdnet}
+processes four half-resolution sub-images and takes a noise-level map as an
+extra input, so one network covers a range of noise strengths; the author's
+colour model \cite{kair} has 852,108 parameters and reports 31.21\dB{} on
+CBSD68 at $\sigma=25$. Its map describes only Gaussian noise, not blur or
+JPEG. NAFNet \cite{chen2022nafnet} and Restormer \cite{zamir2022restormer}
+mark the efficient and heavy ends of modern restoration and lie outside our
+budget.
+
+\paragraph{Frequency-domain restoration.} MWCNN \cite{liu2018mwcnn} replaces
+pooling in a U-Net with wavelet transforms and processes subbands jointly,
+which motivates our cross-band fusion. Fast Fourier Convolution
+\cite{chi2020ffc} adds a global Fourier branch to each layer. FFTformer
+\cite{kong2023fftformer} computes attention-related operations in the
+frequency domain. The closest work is SFNet \cite{cui2023sfnet} and FSNet
+\cite{cui2024fsnet}, which already perform local, content-adaptive frequency
+selection. Our distinction is narrower: \fcsg{} uses \emph{fixed} radial
+masks and puts the learned spatial decision in the choice among shared
+$7\times7$, $5\times5$ and $3\times3$ experts, which we can then compare with
+known degradation parameters.
+
+\paragraph{Mixture of experts.} Shazeer et al.\ \cite{shazeer2017moe} route
+each example to a few experts with a top-$k$ gate and balance load with
+auxiliary penalties; Switch Transformers \cite{fedus2022switch} simplify this
+to one expert per token. The efficiency argument for sparse experts depends on
+not running the unselected ones. Our implementation computes every expert
+and mixes them with sparse weights, so sparsity here aids analysis, not
+speed. The fusion stage uses squeeze-and-excitation \cite{hu2018se}.
+
+\paragraph{Metrics.} PSNR is $10\log_{10}(1/\mathrm{MSE})$ on $[0,1]$ RGB
+images, computed per image and averaged. SSIM \cite{wang2004ssim} uses an
+$11\times11$ Gaussian window ($\sigma=1.5$). LPIPS \cite{zhang2018lpips}
+measures distance between deep features (AlexNet variant); lower is better,
+and it can disagree with PSNR.
+
+Table~\ref{tab:gap} summarises the positioning. Each ingredient of \fcsg{} is
+established; the project studies one combination of them under a tight
+budget.
+
+\begin{table}[htbp]
+	\centering
+	\caption{Positioning of \fcsg{} against closely related methods.}
+	\label{tab:gap}
+	\small
+	\begin{tabular}{@{}lcccl@{}}
+		\toprule
+		Method & Freq.\ split & Learned selection & Spatial & Notes \\
+		\midrule
+		DnCNN \cite{zhang2017dncnn}      & --         & --              & --        & residual CNN \\
+		FFDNet \cite{zhang2018ffdnet}    & --         & --              & --        & noise-map input \\
+		MWCNN \cite{liu2018mwcnn}        & wavelet    & --              & --        & joint subbands \\
+		SFNet \cite{cui2023sfnet}        & learned    & frequency       & local     & closest prior work \\
+		Sparse MoE \cite{shazeer2017moe} & --         & experts         & --        & per-example routing \\
+		\fcsg{} (ours)                   & radial FFT & experts, top-2  & per pixel & 97k parameters \\
+		\bottomrule
+	\end{tabular}
+\end{table}

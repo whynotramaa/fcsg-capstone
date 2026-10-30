@@ -13,7 +13,14 @@ left out and appears only as future work.
 Authors (ascending roll number): Akshat Mittal (123CS0954), Risav Rathi
 (123CS0957), Ramnath Thakur (123CS0965). Supervisor: Dr. Shyampada Mukherjee.
 
-Build:
+Two versions share FrontPages.tex, macros.tex and Ref/:
+
+| Version | Driver | Chapters | PDF | Pages |
+|---|---|---|---|---|
+| Full  | `main.tex`  | `chapters/`, `appendix/` | `FCSG_report_draft.pdf` | 58 |
+| Short | `short.tex` | `short/` | `FCSG_report_short.pdf` | 29 |
+
+Build (swap `main.tex` for `short.tex` for the short one):
 
 ```
 cd thesis && latexmk -pdf -outdir=build main.tex
