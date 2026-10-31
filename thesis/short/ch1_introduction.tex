@@ -9,8 +9,8 @@ different part of the spectrum. Blur removes high frequencies, resampling
 discards detail above a resolution limit, noise dominates wherever the signal
 is weak (in natural images, the high frequencies), and JPEG quantises the mid
 and high frequencies of each $8\times8$ block. Most restoration networks
-treat the mixture as one problem, and the strongest of them, such as
-Restormer \cite{zamir2022restormer}, need tens of millions of parameters.
+treat the mixture as one problem, and the strongest of them
+need tens of millions of parameters.
 
 This project asks whether a very small network can use that spectral
 structure explicitly: split the image into frequency bands, and let a learned

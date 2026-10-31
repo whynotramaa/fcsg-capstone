@@ -27,10 +27,10 @@ on a Tesla T4 in Kaggle sessions that resume from checkpoints.
 		\toprule
 		Setting & Value \\
 		\midrule
-		Optimiser and schedule & AdamW \cite{loshchilov2019adamw}, $2\times10^{-4}$ cosine \cite{loshchilov2017sgdr} to $10^{-6}$ \\
+		Optimiser and schedule & AdamW, $2\times10^{-4}$ cosine decay to $10^{-6}$ \\
 		Updates and batch      & 200,000; 16 crops of $128\times128$ \\
 		Loss                   & $\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}$ (+ entropy for \fcsg{}) \\
-		Precision              & FP16 mixed precision \cite{micikevicius2018amp} \\
+		Precision              & FP16 mixed precision \\
 		Hardware               & NVIDIA Tesla T4 (Kaggle) \\
 		\bottomrule
 	\end{tabular}
@@ -71,8 +71,7 @@ and it is better to learn that in seconds than after ten hours of training.
 \end{table}
 
 To validate the FFDNet code against a published number we evaluated the
-author's pretrained colour weights \cite{kair} on the 68 CBSD68 images
-\cite{martin2001bsd} with the author's protocol, obtaining 31.220\dB{}
+author's pretrained colour weights \cite{zhang2018ffdnet} on the 68 CBSD68 images with the author's protocol, obtaining 31.220\dB{}
 against 31.21\dB{} in the paper, a difference of 0.01\dB{}. As an end-to-end
 check of the training loop, DnCNN trained on clipped Gaussian noise at
 $\sigma=25$ reached 32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.

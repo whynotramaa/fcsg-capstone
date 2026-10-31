@@ -18,7 +18,7 @@ Two versions share FrontPages.tex, macros.tex and Ref/:
 | Version | Driver | Chapters | PDF | Pages |
 |---|---|---|---|---|
 | Full  | `main.tex`  | `chapters/`, `appendix/` | `FCSG_report_draft.pdf` | 58 |
-| Short | `short.tex` | `short/` | `FCSG_report_short.pdf` | 29 |
+| Short | `short.tex` | `short/` | `FCSG_report_short.pdf` | 21 (4 front pages, 7 references) |
 
 Build (swap `main.tex` for `short.tex` for the short one):
 

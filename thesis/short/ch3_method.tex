@@ -57,10 +57,9 @@ as on a full image. And each band returns to the spatial domain before any
 learning: a convolution over a spectrum has no clear meaning and complex
 inputs make training unstable, so the experts stay plain real-valued CNNs.
 
-\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle
-\cite{shi2016espcn} (12 channels at half resolution), a $1\times1$
+\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle (12 channels at half resolution), a $1\times1$
 convolution to 48 channels, four residual blocks of two depthwise-separable
-stages \cite{chollet2017xception} with kernel $k\in\{7,5,3\}$, a $1\times1$
+stages with kernel $k\in\{7,5,3\}$, a $1\times1$
 tail added to the unshuffled input, and a pixel shuffle back. Separable,
 half-resolution processing is what keeps nine expert passes inside the
 compute budget. We name the experts only by kernel size, since we have no
@@ -76,7 +75,7 @@ weight. The dense softmax $p_{b,e}$ over all three is kept for the loss. The
 gate has 681 parameters. All experts are still computed before mixing.
 
 \paragraph{Fusion and refinement.} The nine band channels pass through a
-squeeze-and-excitation block \cite{hu2018se}, a $1\times1$ projection to RGB
+squeeze-and-excitation block, a $1\times1$ projection to RGB
 and three $3\times3$ convolutions ($3\to16\to16\to3$). The output is a
 residual added to the input, as in DnCNN.
 
@@ -86,7 +85,7 @@ residual added to the input, as in DnCNN.
 	\mathcal{L}=\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}+\lambda_\text{ent}(t)\,\mathcal{L}_\text{ent}.
 \end{equation}
 $\mathcal{L}_\text{char}=\operatorname{mean}\sqrt{(\hat f-f)^2+\varepsilon^2}$,
-$\varepsilon=10^{-3}$, is the Charbonnier loss \cite{charbonnier1994}.
+$\varepsilon=10^{-3}$, is the Charbonnier loss.
 $\mathcal{L}_\text{freq}$ is the mean absolute FFT of the error, which weights
 all frequencies equally. $\mathcal{L}_\text{ent}=\sum_b\operatorname{mean}
 \sum_e p_{b,e}\log p_{b,e}$ is negative routing entropy; minimising it keeps

@@ -107,25 +107,12 @@ spatial routing, lightweight networks}
 % ===== end FrontPages.tex =====
             % college file: title, names, roll nos, guide(s)
 
-\coverPage
+% Four front pages: title, abstract, acknowledgement, contents.
+% Certificates, declaration and lists of figures/tables are in main.tex only.
 \titlePage
-\certificateOfExamination
-
-\certificateOneSupervisor
-%\certificateTwoSupervisors
-
-%\dedication                    % add \dedicationText in FrontPages.tex to use
-\declaration
-\acknowledgment
 \abstract
-
-\tableofcontents
-\cleardoublepage
-\addcontentsline{toc}{chapter}{List of Figures}
-\listoffigures
-\cleardoublepage
-\addcontentsline{toc}{chapter}{List of Tables}
-\listoftables
+\acknowledgment
+{\singlespacing\tableofcontents}
 \cleardoublepage
 
 % ---------------------------------------------------------------- main matter
@@ -145,8 +132,8 @@ different part of the spectrum. Blur removes high frequencies, resampling
 discards detail above a resolution limit, noise dominates wherever the signal
 is weak (in natural images, the high frequencies), and JPEG quantises the mid
 and high frequencies of each $8\times8$ block. Most restoration networks
-treat the mixture as one problem, and the strongest of them, such as
-Restormer \cite{zamir2022restormer}, need tens of millions of parameters.
+treat the mixture as one problem, and the strongest of them
+need tens of millions of parameters.
 
 This project asks whether a very small network can use that spectral
 structure explicitly: split the image into frequency bands, and let a learned
@@ -203,37 +190,31 @@ stack of convolutions with batch normalisation learns denoising much more
 easily by predicting the noise residual. FFDNet \cite{zhang2018ffdnet}
 processes four half-resolution sub-images and takes a noise-level map as an
 extra input, so one network covers a range of noise strengths; the author's
-colour model \cite{kair} has 852,108 parameters and reports 31.21\dB{} on
-CBSD68 at $\sigma=25$. Its map describes only Gaussian noise, not blur or
-JPEG. NAFNet \cite{chen2022nafnet} and Restormer \cite{zamir2022restormer}
-mark the efficient and heavy ends of modern restoration and lie outside our
-budget.
+colour model has 852,108 parameters and reports 31.21\dB{} on CBSD68 at
+$\sigma=25$. Its map describes only Gaussian noise, not blur or JPEG. Larger
+transformer-based restorers reach higher quality but need tens of millions of
+parameters, far outside our budget.
 
 \paragraph{Frequency-domain restoration.} MWCNN \cite{liu2018mwcnn} replaces
 pooling in a U-Net with wavelet transforms and processes subbands jointly,
-which motivates our cross-band fusion. Fast Fourier Convolution
-\cite{chi2020ffc} adds a global Fourier branch to each layer. FFTformer
-\cite{kong2023fftformer} computes attention-related operations in the
-frequency domain. The closest work is SFNet \cite{cui2023sfnet} and FSNet
-\cite{cui2024fsnet}, which already perform local, content-adaptive frequency
-selection. Our distinction is narrower: \fcsg{} uses \emph{fixed} radial
-masks and puts the learned spatial decision in the choice among shared
-$7\times7$, $5\times5$ and $3\times3$ experts, which we can then compare with
-known degradation parameters.
+which motivates our cross-band fusion. The closest work is SFNet
+\cite{cui2023sfnet}, which already performs local, content-adaptive frequency
+selection inside a U-shaped network. Our distinction is narrower: \fcsg{}
+uses \emph{fixed} radial masks and puts the learned spatial decision in the
+choice among shared $7\times7$, $5\times5$ and $3\times3$ experts, which we
+can then compare with known degradation parameters.
 
 \paragraph{Mixture of experts.} Shazeer et al.\ \cite{shazeer2017moe} route
 each example to a few experts with a top-$k$ gate and balance load with
-auxiliary penalties; Switch Transformers \cite{fedus2022switch} simplify this
-to one expert per token. The efficiency argument for sparse experts depends on
-not running the unselected ones. Our implementation computes every expert
-and mixes them with sparse weights, so sparsity here aids analysis, not
-speed. The fusion stage uses squeeze-and-excitation \cite{hu2018se}.
+auxiliary penalties. The efficiency argument for sparse experts depends on
+not running the unselected ones. Our implementation computes every expert and
+mixes them with sparse weights, so sparsity here aids analysis, not speed.
 
 \paragraph{Metrics.} PSNR is $10\log_{10}(1/\mathrm{MSE})$ on $[0,1]$ RGB
-images, computed per image and averaged. SSIM \cite{wang2004ssim} uses an
-$11\times11$ Gaussian window ($\sigma=1.5$). LPIPS \cite{zhang2018lpips}
-measures distance between deep features (AlexNet variant); lower is better,
-and it can disagree with PSNR.
+images, computed per image and averaged. SSIM compares local means, variances
+and covariances in an $11\times11$ Gaussian window ($\sigma=1.5$). LPIPS
+\cite{zhang2018lpips} measures distance between deep features (AlexNet
+variant); lower is better, and it can disagree with PSNR.
 
 Table~\ref{tab:gap} summarises the positioning. Each ingredient of \fcsg{} is
 established; the project studies one combination of them under a tight
@@ -320,10 +301,9 @@ as on a full image. And each band returns to the spatial domain before any
 learning: a convolution over a spectrum has no clear meaning and complex
 inputs make training unstable, so the experts stay plain real-valued CNNs.
 
-\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle
-\cite{shi2016espcn} (12 channels at half resolution), a $1\times1$
+\paragraph{Experts.} Each expert applies a $2\times2$ pixel unshuffle (12 channels at half resolution), a $1\times1$
 convolution to 48 channels, four residual blocks of two depthwise-separable
-stages \cite{chollet2017xception} with kernel $k\in\{7,5,3\}$, a $1\times1$
+stages with kernel $k\in\{7,5,3\}$, a $1\times1$
 tail added to the unshuffled input, and a pixel shuffle back. Separable,
 half-resolution processing is what keeps nine expert passes inside the
 compute budget. We name the experts only by kernel size, since we have no
@@ -339,7 +319,7 @@ weight. The dense softmax $p_{b,e}$ over all three is kept for the loss. The
 gate has 681 parameters. All experts are still computed before mixing.
 
 \paragraph{Fusion and refinement.} The nine band channels pass through a
-squeeze-and-excitation block \cite{hu2018se}, a $1\times1$ projection to RGB
+squeeze-and-excitation block, a $1\times1$ projection to RGB
 and three $3\times3$ convolutions ($3\to16\to16\to3$). The output is a
 residual added to the input, as in DnCNN.
 
@@ -349,7 +329,7 @@ residual added to the input, as in DnCNN.
 	\mathcal{L}=\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}+\lambda_\text{ent}(t)\,\mathcal{L}_\text{ent}.
 \end{equation}
 $\mathcal{L}_\text{char}=\operatorname{mean}\sqrt{(\hat f-f)^2+\varepsilon^2}$,
-$\varepsilon=10^{-3}$, is the Charbonnier loss \cite{charbonnier1994}.
+$\varepsilon=10^{-3}$, is the Charbonnier loss.
 $\mathcal{L}_\text{freq}$ is the mean absolute FFT of the error, which weights
 all frequencies equally. $\mathcal{L}_\text{ent}=\sum_b\operatorname{mean}
 \sum_e p_{b,e}\log p_{b,e}$ is negative routing entropy; minimising it keeps
@@ -398,10 +378,10 @@ on a Tesla T4 in Kaggle sessions that resume from checkpoints.
 		\toprule
 		Setting & Value \\
 		\midrule
-		Optimiser and schedule & AdamW \cite{loshchilov2019adamw}, $2\times10^{-4}$ cosine \cite{loshchilov2017sgdr} to $10^{-6}$ \\
+		Optimiser and schedule & AdamW, $2\times10^{-4}$ cosine decay to $10^{-6}$ \\
 		Updates and batch      & 200,000; 16 crops of $128\times128$ \\
 		Loss                   & $\mathcal{L}_\text{char}+0.05\,\mathcal{L}_\text{freq}$ (+ entropy for \fcsg{}) \\
-		Precision              & FP16 mixed precision \cite{micikevicius2018amp} \\
+		Precision              & FP16 mixed precision \\
 		Hardware               & NVIDIA Tesla T4 (Kaggle) \\
 		\bottomrule
 	\end{tabular}
@@ -442,8 +422,7 @@ and it is better to learn that in seconds than after ten hours of training.
 \end{table}
 
 To validate the FFDNet code against a published number we evaluated the
-author's pretrained colour weights \cite{kair} on the 68 CBSD68 images
-\cite{martin2001bsd} with the author's protocol, obtaining 31.220\dB{}
+author's pretrained colour weights \cite{zhang2018ffdnet} on the 68 CBSD68 images with the author's protocol, obtaining 31.220\dB{}
 against 31.21\dB{} in the paper, a difference of 0.01\dB{}. As an end-to-end
 check of the training loop, DnCNN trained on clipped Gaussian noise at
 $\sigma=25$ reached 32.65\dB{} on DIV2K validation and 31.04\dB{} on CBSD68.
